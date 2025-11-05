@@ -214,7 +214,16 @@ nav a:hover { color: var(--brand); }
 }
 .app strong { display:block; margin-bottom:6px; font-size:18px; color:var(--text); }
 .app small { color: var(--muted); }
-
+.app {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  transition: transform .2s, box-shadow .2s;
+}
+.app:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 25px rgba(34,211,166,.4);
+}
 /* Contact Form */
 .contact-form input, .contact-form textarea {
   width: 100%;
