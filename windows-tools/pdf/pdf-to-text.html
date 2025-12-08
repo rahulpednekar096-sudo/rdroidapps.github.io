@@ -2,28 +2,130 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8">
-  <title>PDF to Text – Extract Text from PDF</title>
+  <meta charset="utf-8">
+  <title>PDF → Text — RDroid Apps</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
   <link rel="stylesheet" href="../../css/style.css">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.12.313/pdf.min.js"></script>
+
+  <!-- pdf.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+
+  <!-- OCR -->
+  <script src="https://unpkg.com/tesseract.js@v4.1.1/dist/tesseract.min.js"></script>
+
   <style>
-    .tool-section {
-      max-width: 700px;
-      margin: auto;
-      padding: 120px 20px 40px;
+    :root {
+      --card: #131619;
+      --muted: #9fbfb0;
+      --accent: #0aa37f;
+    }
+
+    body {
+      margin-top: 100px;
+    }
+
+    .menu-btn {
+      background: transparent;
+      border: none;
+      color: var(--accent);
+      font-size: 20px;
+      cursor: pointer;
+    }
+
+    .section {
+      max-width: 980px;
+      margin: 40px auto;
+      padding: 22px;
+      background: var(--card);
+      border-radius: 12px
+    }
+
+    h1 {
+      margin: 0 0 6px
+    }
+
+    p.lead {
+      color: var(--muted)
+    }
+
+    .drop {
+      border: 2px dashed #222;
+      padding: 18px;
+      border-radius: 10px;
       text-align: center;
+      color: var(--muted);
+      cursor: pointer
     }
 
-    .tool-section h1 {
-      margin-bottom: 10px;
+    .thumb {
+      width: 140px;
+      padding: 8px;
+      background: #0b0c0d;
+      border-radius: 8px;
+      border: 1px solid #222;
+      text-align: center;
+      margin-top: 10px
     }
 
-    .tool-section p {
-      margin-bottom: 20px;
+    .thumb img {
+      max-width: 100px;
+      border-radius: 6px
     }
 
-    input[type="file"] {
-      margin: 20px 0;
+    .thumbs {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 10px
+    }
+
+    .btn {
+      padding: 10px 12px;
+      border-radius: 8px;
+      cursor: pointer
+    }
+
+    .btn-primary {
+      background: #0aa37f;
+      color: #fff;
+      border: none
+    }
+
+    .progress {
+      height: 10px;
+      background: #111;
+      border-radius: 8px;
+      margin-top: 12px;
+      display: none
+    }
+
+    .bar {
+      height: 100%;
+      width: 0;
+      background: var(--accent)
+    }
+
+    textarea {
+      width: 100%;
+      height: 260px;
+      margin-top: 12px;
+      background: #0b0c0d;
+      color: #cfeee0;
+      border: 1px solid #333;
+      padding: 12px;
+      border-radius: 8px;
+      font-family: monospace
+    }
+
+    .log {
+      background: #0b0c0d;
+      color: #9fbfb0;
+      padding: 10px;
+      border-radius: 8px;
+      height: 120px;
+      overflow: auto;
+      margin-top: 10px;
+      font-size: 13px
     }
   </style>
 </head>
@@ -50,54 +152,149 @@
     <a href="../../contact.html">✉️ Contact</a>
     <a href="../../privacy-policy.html">🔒 Privacy Policy</a>
   </nav>
+  <section class="section">
+    <h1>PDF → Text</h1>
+    <p class="lead">Extract text from any PDF. Optional OCR for scanned PDFs.</p>
 
-  <div class="section" style="padding-top:120px;max-width:900px;">
-    <h1>PDF to Text</h1>
-    <p>Extract readable text content from your PDF file.</p>
+    <div class="drop" id="dropArea">
+      Drop PDF here or <button class="btn" id="pickBtn">Choose file</button>
+      <input type="file" id="fileInput" accept="application/pdf" style="display:none">
+    </div>
 
-    <input type="file" id="pdfFile" accept="application/pdf" style="margin:15px 0;">
-    <button class="btn btn-primary" onclick="extractText()">Extract Text</button>
+    <label style="display:block;margin-top:10px">
+      <input type="checkbox" id="enableOCR"> Enable OCR (for scanned pages)
+    </label>
 
-    <textarea id="outputText" placeholder="Extracted text will appear here..."
-      style="width:100%;height:250px;padding:15px;margin-top:20px;border-radius:12px;border:1px solid #ccc;font-size:16px;">
-  </textarea>
-  </div>
+    <div style="margin-top:12px;display:flex;gap:10px">
+      <button class="btn-primary" id="extractBtn">Extract Text</button>
+      <button class="btn" id="clearBtn">Clear</button>
+    </div>
 
-  <footer>© 2025 RDroid Apps – PDF Tools</footer>
+    <div class="progress" id="progressWrap">
+      <div class="bar" id="progressBar"></div>
+    </div>
+
+    <div id="thumbs" class="thumbs"></div>
+
+    <pre id="log" class="log">Ready.</pre>
+
+    <textarea id="output" placeholder="Extracted text will appear here..."></textarea>
+
+    <div style="margin-top:10px;display:flex;gap:10px">
+      <button class="btn-primary" id="downloadBtn">Download .txt</button>
+      <button class="btn" id="copyBtn">Copy</button>
+    </div>
+
+  </section>
+  <footer>© 2025 RDroid Apps — PDF Tools</footer>
 
   <script>
-
     // Drawer toggle
     function toggleMenu() {
       document.getElementById("drawer").classList.toggle("open");
     }
+    const pickBtn = document.getElementById("pickBtn");
+    const fileInput = document.getElementById("fileInput");
+    const dropArea = document.getElementById("dropArea");
+    const extractBtn = document.getElementById("extractBtn");
+    const thumbs = document.getElementById("thumbs");
+    const logEl = document.getElementById("log");
+    const output = document.getElementById("output");
+    const progressWrap = document.getElementById("progressWrap");
+    const progressBar = document.getElementById("progressBar");
+    const enableOCR = document.getElementById("enableOCR");
 
-    async function extractText() {
-      const file = document.getElementById("pdfFile").files[0];
-      if (!file) {
-        alert("Please select a PDF file!");
-        return;
+    let pdf = null;
+
+    function log(msg) { logEl.textContent += "\n" + msg; logEl.scrollTop = logEl.scrollHeight; }
+    function setProgress(v) { progressWrap.style.display = v >= 0 ? "block" : "none"; progressBar.style.width = (v * 100) + "%"; }
+
+    pickBtn.onclick = () => fileInput.click();
+    fileInput.onchange = e => loadPDF(e.target.files[0]);
+
+    dropArea.ondragover = e => { e.preventDefault(); dropArea.style.borderColor = "#0aa37f"; }
+    dropArea.ondragleave = () => dropArea.style.borderColor = "#222";
+    dropArea.ondrop = e => {
+      e.preventDefault(); dropArea.style.borderColor = "#222";
+      loadPDF(e.dataTransfer.files[0]);
+    };
+
+    async function loadPDF(file) {
+      if (!file) return;
+      logEl.textContent = "Loading PDF...";
+      pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js";
+      pdf = await pdfjsLib.getDocument({ data: await file.arrayBuffer() }).promise;
+      log("PDF loaded, pages: " + pdf.numPages);
+      await loadThumbnails();
+    }
+
+    async function loadThumbnails() {
+      thumbs.innerHTML = "";
+      for (let i = 1; i <= pdf.numPages; i++) {
+        const p = await pdf.getPage(i);
+        const vp = p.getViewport({ scale: .2 });
+        const c = document.createElement("canvas");
+        c.width = vp.width; c.height = vp.height;
+        await p.render({ canvasContext: c.getContext("2d"), viewport: vp }).promise;
+        const img = c.toDataURL();
+        thumbs.innerHTML += `<div class="thumb">
+      <img src="${img}">
+      <label><input type="checkbox" class="pageSel" data-id="${i}" checked> Page ${i}</label>
+    </div>`;
       }
+    }
 
-      const output = document.getElementById("outputText");
-      output.value = "Processing… Please wait.";
-
-      const arrayBuffer = await file.arrayBuffer();
-      const pdf = await pdfjsLib.getDocument(new Uint8Array(arrayBuffer)).promise;
+    extractBtn.onclick = async () => {
+      if (!pdf) { alert("Load PDF first"); return; }
+      output.value = ""; logEl.textContent = "Extracting...";
+      const selected = [...document.querySelectorAll(".pageSel:checked")].map(x => parseInt(x.dataset.id));
+      if (!selected.length) { alert("Select at least one page"); return; }
 
       let finalText = "";
 
-      for (let i = 1; i <= pdf.numPages; i++) {
-        const page = await pdf.getPage(i);
-        const textContent = await page.getTextContent();
-        finalText += textContent.items.map(item => item.str).join(' ') + "\n\n";
+      for (let pi = 0; pi < selected.length; pi++) {
+        const pageNum = selected[pi];
+        const page = await pdf.getPage(pageNum);
+
+        if (enableOCR.checked) {
+          log("OCR page " + pageNum + "...");
+          const vp = page.getViewport({ scale: 2 });
+          const c = document.createElement("canvas");
+          c.width = vp.width; c.height = vp.height;
+          await page.render({ canvasContext: c.getContext("2d"), viewport: vp }).promise;
+          const ocr = await Tesseract.recognize(c, "eng");
+          finalText += `\n\n--- Page ${pageNum} ---\n` + ocr.data.text;
+        } else {
+          log("Extracting text from page " + pageNum);
+          const content = await page.getTextContent();
+          const text = content.items.map(it => it.str).join(" ");
+          finalText += `\n\n--- Page ${pageNum} ---\n` + text;
+        }
+        setProgress((pi + 1) / selected.length);
       }
 
       output.value = finalText;
-    }
+      log("Done.");
+      setProgress(-1);
+    };
 
+    document.getElementById("copyBtn").onclick = () => {
+      navigator.clipboard.writeText(output.value);
+      alert("Copied!");
+    };
+
+    document.getElementById("downloadBtn").onclick = () => {
+      const blob = new Blob([output.value], { type: "text/plain" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "extracted.txt";
+      a.click();
+    };
+
+    document.getElementById("clearBtn").onclick = () => {
+      pdf = null; thumbs.innerHTML = ""; output.value = ""; logEl.textContent = "Ready.";
+    };
   </script>
-
 </body>
 
 </html>
