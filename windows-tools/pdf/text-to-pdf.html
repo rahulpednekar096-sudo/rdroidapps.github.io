@@ -2,38 +2,110 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Text to PDF – Convert Text into PDF</title>
-
-  <!-- Correct RDroidApps CSS -->
+  <meta charset="utf-8">
+  <title>Text → PDF — RDroid Apps</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
   <link rel="stylesheet" href="../../css/style.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
   <style>
-    .tool-section {
-      max-width: 700px;
-      margin: auto;
-      padding: 120px 20px 40px;
-      text-align: center;
+    :root {
+      --card: #131619;
+      --accent: #0aa37f;
+      --muted: #9fbfb0
     }
 
-    .tool-section h1 {
-      margin-bottom: 10px;
+    body {
+      margin-top: 100px;
     }
 
-    .tool-section p {
-      margin-bottom: 20px;
+    .menu-btn {
+      background: transparent;
+      border: none;
+      color: var(--accent);
+      font-size: 20px;
+      cursor: pointer;
     }
 
-    input[type="file"] {
-      margin: 20px 0;
+    .section {
+      max-width: 980px;
+      margin: 40px auto;
+      padding: 22px;
+      background: var(--card);
+      border-radius: 12px
+    }
+
+    h1 {
+      margin: 0 0 6px
+    }
+
+    p.lead {
+      color: var(--muted)
+    }
+
+    textarea {
+      width: 100%;
+      height: 320px;
+      margin-top: 10px;
+      background: #0b0c0d;
+      color: #dbeee5;
+      border: 1px solid #222;
+      padding: 12px;
+      border-radius: 8px;
+      font-family: monospace
+    }
+
+    .controls {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 10px
+    }
+
+    .control {
+      background: #0f1315;
+      border: 1px solid #222;
+      padding: 10px;
+      border-radius: 8px;
+      min-width: 160px
+    }
+
+    select,
+    input[type=number],
+    input[type=text] {
+      width: 100%;
+      padding: 8px;
+      border-radius: 6px;
+      background: #090b0c;
+      color: #e6eef0;
+      border: 1px solid #222
+    }
+
+    .btn {
+      padding: 10px 12px;
+      border-radius: 8px;
+      cursor: pointer
+    }
+
+    .btn-primary {
+      background: #0aa37f;
+      color: #fff;
+      border: none
+    }
+
+    .log {
+      height: 120px;
+      background: #0b0c0d;
+      padding: 10px;
+      border-radius: 8px;
+      margin-top: 12px;
+      color: #9fbfb0;
+      overflow: auto
     }
   </style>
 </head>
 
 <body>
-
   <!-- RDroidApps Header -->
   <header>
     <button class="menu-btn" onclick="toggleMenu()">☰</button>
@@ -54,50 +126,116 @@
     <a href="../../contact.html">✉️ Contact</a>
     <a href="../../privacy-policy.html">🔒 Privacy Policy</a>
   </nav>
+  <section class="section">
 
-  <div class="section" style="padding-top:120px;max-width:900px;">
-    <h1>Text to PDF</h1>
-    <p>Type or paste any text and instantly convert it into a PDF file.</p>
+    <h1>Text → PDF</h1>
+    <p class="lead">Write or paste text and convert into a formatted PDF with custom page settings.</p>
 
-    <textarea id="textInput" placeholder="Enter your text here..."
-      style="width:100%;height:250px;padding:15px;border-radius:12px;border:1px solid #ccc;font-size:16px;">
-  </textarea>
+    <textarea id="txt" placeholder="Enter your text here..."></textarea>
 
-    <button class="btn btn-primary" onclick="convertTextToPDF()" style="margin-top:20px;">Convert Now</button>
+    <div class="controls">
 
-    <div id="output" style="margin-top:25px;"></div>
-  </div>
+      <div class="control">
+        <label>Page size</label>
+        <select id="pageSize">
+          <option value="A4">A4</option>
+          <option value="Letter">Letter</option>
+        </select>
+        <label style="margin-top:6px">Orientation</label>
+        <select id="orientation">
+          <option value="p">Portrait</option>
+          <option value="l">Landscape</option>
+        </select>
+      </div>
 
-  <footer>© 2025 RDroid Apps – PDF Tools</footer>
+      <div class="control">
+        <label>Font size</label>
+        <input type="number" id="fontSize" value="12">
+        <label style="margin-top:6px">Line spacing</label>
+        <input type="number" id="lineGap" value="6">
+      </div>
 
+      <div class="control">
+        <label>Margins (mm)</label>
+        <input type="number" id="margin" value="10">
+        <label style="margin-top:6px">Header text</label>
+        <input type="text" id="header">
+        <label style="margin-top:6px">Footer text</label>
+        <input type="text" id="footer">
+      </div>
+
+    </div>
+
+    <div style="margin-top:12px">
+      <button class="btn-primary" id="convertBtn">Create PDF</button>
+    </div>
+
+    <pre id="log" class="log">Ready.</pre>
+
+    <div id="download"></div>
+
+  </section>
+  <footer>© 2025 RDroid Apps — PDF Tools</footer>
   <script>
-
     // Drawer toggle
     function toggleMenu() {
       document.getElementById("drawer").classList.toggle("open");
     }
+    const txt = document.getElementById("txt");
+    const logEl = document.getElementById("log");
+    const download = document.getElementById("download");
 
-    function convertTextToPDF() {
-      const text = document.getElementById("textInput").value.trim();
-      if (!text) {
-        alert("Please enter some text first!");
-        return;
+    function log(msg) { logEl.textContent += "\n" + msg; logEl.scrollTop = logEl.scrollHeight; }
+
+    document.getElementById("convertBtn").onclick = async () => {
+      const content = txt.value.trim();
+      if (!content) { alert("Enter some text"); return; }
+
+      log("Creating PDF...");
+      const { jsPDF } = window.jspdf;
+
+      const size = document.getElementById("pageSize").value === "A4" ? "a4" : "letter";
+      const orient = document.getElementById("orientation").value === "p" ? "portrait" : "landscape";
+      const margin = parseFloat(document.getElementById("margin").value) || 10;
+      const fs = parseFloat(document.getElementById("fontSize").value) || 12;
+      const gap = parseFloat(document.getElementById("lineGap").value) || 6;
+
+      const header = document.getElementById("header").value;
+      const footer = document.getElementById("footer").value;
+
+      const pdf = new jsPDF({ unit: "mm", format: size, orientation: orient });
+      pdf.setFontSize(fs);
+
+      let y = margin;
+
+      const lines = content.split("\n");
+
+      for (let i = 0; i < lines.length; i++) {
+        if (y === margin && header) { pdf.text(header, margin, y); y += fs + 3; }
+        const wrapped = pdf.splitTextToSize(lines[i], pdf.internal.pageSize.getWidth() - margin * 2);
+        wrapped.forEach(line => {
+          if (y > pdf.internal.pageSize.getHeight() - margin) {
+            if (footer) pdf.text(footer, margin, pdf.internal.pageSize.getHeight() - 6);
+            pdf.addPage(); y = margin;
+            if (header) { pdf.text(header, margin, y); y += fs + 3; }
+          }
+          pdf.text(line, margin, y);
+          y += fs + gap;
+        });
       }
 
-      const output = document.getElementById("output");
-      output.innerHTML = "<p>Processing… Please wait.</p>";
+      if (footer) pdf.text(footer, margin, pdf.internal.pageSize.getHeight() - 6);
 
-      const { jsPDF } = window.jspdf;
-      const pdf = new jsPDF();
-
-      const lines = pdf.splitTextToSize(text, 180);
-      pdf.text(lines, 15, 15);
-
-      pdf.save("text.pdf");
-
-      output.innerHTML = "<p>PDF Generated Successfully!</p>";
-    }
-
+      const blob = pdf.output("blob");
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "text.pdf";
+      a.textContent = "Download PDF";
+      a.className = "btn-primary";
+      download.innerHTML = "";
+      download.appendChild(a);
+      log("Done.");
+    };
   </script>
 
 </body>
