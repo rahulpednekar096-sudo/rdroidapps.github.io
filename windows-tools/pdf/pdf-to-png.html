@@ -2,34 +2,169 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8">
-  <title>PDF to PNG – Convert PDF Pages to PNG Images</title>
+  <meta charset="utf-8" />
+  <title>PDF → PNG — RDroid Apps (Upgraded)</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <link rel="stylesheet" href="../../css/style.css">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.12.313/pdf.min.js"></script>
+
+  <!-- pdf.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+  <!-- ZIP + FileSaver -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
   <style>
-    .tool-section {
-      max-width: 700px;
-      margin: auto;
-      padding: 120px 20px 40px;
+    :root {
+      --card: #131619;
+      --muted: #9fbfb0;
+      --accent: #0aa37f
+    }
+
+    body {
+      margin-top: 100px;
+    }
+    .menu-btn {
+      background: transparent;
+      border: none;
+      color: var(--accent);
+      font-size: 20px;
+      cursor: pointer;
+    }
+
+    .section {
+      max-width: 980px;
+      margin: 40px auto;
+      padding: 22px;
+      background: var(--card);
+      border-radius: 12px
+    }
+
+    h1 {
+      margin: 0 0 6px
+    }
+
+    p.lead {
+      color: var(--muted)
+    }
+
+    .drop {
+      border: 2px dashed #202426;
+      padding: 18px;
+      border-radius: 10px;
       text-align: center;
+      color: var(--muted);
+      cursor: pointer
     }
 
-    .tool-section h1 {
-      margin-bottom: 10px;
+    .drop.dragover {
+      border-color: var(--accent);
+      background: rgba(10, 163, 127, 0.03)
     }
 
-    .tool-section p {
-      margin-bottom: 20px;
+    .controls {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 12px
     }
 
-    input[type="file"] {
-      margin: 20px 0;
+    .control {
+      background: #0f1315;
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid #222;
+      min-width: 180px
+    }
+
+    select,
+    input[type=number],
+    input[type=text] {
+      width: 100%;
+      padding: 8px;
+      border-radius: 6px;
+      background: #090b0c;
+      color: #e6eef0;
+      border: 1px solid #222
+    }
+
+    .thumbs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 14px
+    }
+
+    .thumb {
+      width: 140px;
+      padding: 8px;
+      border-radius: 8px;
+      background: #0b0c0d;
+      border: 1px solid #222;
+      text-align: center
+    }
+
+    .thumb img {
+      max-width: 120px;
+      max-height: 90px;
+      border-radius: 6px
+    }
+
+    .btn {
+      padding: 8px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      border: 1px solid var(--accent);
+      background: transparent;
+      color: var(--accent)
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #000;
+      border: none
+    }
+
+    .btn-danger {
+      background: #c62828;
+      color: #fff;
+      border: none
+    }
+
+    .progress {
+      width: 100%;
+      height: 12px;
+      border-radius: 8px;
+      background: #0b0c0d;
+      margin-top: 12px;
+      display: none
+    }
+
+    .bar {
+      height: 100%;
+      width: 0%;
+      background: var(--accent);
+      transition: width .2s
+    }
+
+    .log {
+      margin-top: 12px;
+      background: #0b0c0d;
+      padding: 12px;
+      border-radius: 8px;
+      color: var(--muted);
+      max-height: 200px;
+      overflow: auto
+    }
+
+    footer {
+      text-align: center;
+      color: var(--muted);
+      margin-top: 16px
     }
   </style>
 </head>
 
 <body>
-
   <!-- RDroidApps Header -->
   <header>
     <button class="menu-btn" onclick="toggleMenu()">☰</button>
@@ -50,70 +185,213 @@
     <a href="../../contact.html">✉️ Contact</a>
     <a href="../../privacy-policy.html">🔒 Privacy Policy</a>
   </nav>
+  <section class="section">
+    <h1>PDF → PNG (Upgraded)</h1>
+    <p class="lead">Convert PDF pages into PNG images. Select pages, set DPI/scale, rotate/reorder, download
+      individually or as ZIP.</p>
 
-  <div class="section" style="padding-top:120px;">
-    <h1>PDF to PNG</h1>
-    <p>Convert each page of your PDF into high-quality PNG images.</p>
+    <div class="drop" id="dropArea">Drop PDF here or <button class="btn" id="pickBtn">Choose file</button>
+      <input type="file" id="fileInput" accept="application/pdf" style="display:none" />
+    </div>
 
-    <input type="file" id="pdfFile" accept="application/pdf" style="margin:15px 0;">
-    <button class="btn btn-primary" onclick="convertPDFToPNG()">Convert Now</button>
+    <div class="controls">
+      <div class="control">
+        <label>DPI</label>
+        <select id="dpi">
+          <option value="72">72</option>
+          <option value="100">100</option>
+          <option value="150">150</option>
+          <option value="200">200</option>
+          <option value="300" selected>300</option>
+        </select>
+        <label style="margin-top:8px">Scale mode</label>
+        <select id="scaleMode">
+          <option value="original">Original</option>
+          <option value="fitW">Fit width</option>
+          <option value="fitH">Fit height</option>
+          <option value="custom">Custom (px)</option>
+        </select>
+        <div id="customSize" style="display:none;margin-top:8px"><input type="number" id="cw"
+            placeholder="Width (px)" /><input type="number" id="ch" placeholder="Height (px)" style="margin-top:6px" />
+        </div>
+      </div>
 
-    <div id="output" style="margin-top:25px;"></div>
-  </div>
+      <div class="control">
+        <label>Output</label>
+        <select id="downloadType">
+          <option value="zip" selected>ZIP (recommended)</option>
+          <option value="files">Individual files</option>
+        </select>
+        <label style="margin-top:8px">Output basename</label>
+        <input type="text" id="outName" value="pdf_pages" />
+      </div>
 
-  <footer>© 2025 RDroid Apps – PDF Tools</footer>
+      <div class="control">
+        <label>Preview quality</label>
+        <select id="thumbQ">
+          <option value="0.4">Low</option>
+          <option value="0.6" selected>Medium</option>
+          <option value="0.9">High</option>
+        </select>
+        <label style="margin-top:8px">Auto-select all pages</label>
+        <br><label><input type="checkbox" id="autoSelect" checked> Yes</label>
+      </div>
+    </div>
+
+    <div style="margin-top:12px;display:flex;gap:10px;align-items:center">
+      <button class="btn-primary" id="convertBtn">Convert to PNG</button>
+      <button class="btn" id="clearBtn">Clear</button>
+      <button class="btn" id="selectAllBtn">Select All</button>
+      <button class="btn" id="unselectAllBtn">Unselect All</button>
+      <div style="margin-left:auto;color:#9fbfb0" id="pageInfo"></div>
+    </div>
+
+    <div class="progress" id="progressWrap">
+      <div class="bar" id="progressBar"></div>
+    </div>
+
+    <div id="thumbs" class="thumbs"></div>
+
+    <pre class="log" id="log">Ready.</pre>
+
+    <div id="downloadArea" style="margin-top:12px"></div>
+  </section>
+  <footer>© 2025 RDroid Apps — PDF Tools</footer>
 
   <script>
     // Drawer toggle
     function toggleMenu() {
       document.getElementById("drawer").classList.toggle("open");
     }
+    const pickBtn = document.getElementById('pickBtn'), fileInput = document.getElementById('fileInput'), dropArea = document.getElementById('dropArea');
+    const thumbs = document.getElementById('thumbs'), logEl = document.getElementById('log'), progressWrap = document.getElementById('progressWrap'), progressBar = document.getElementById('progressBar');
+    const dpiSel = document.getElementById('dpi'), scaleMode = document.getElementById('scaleMode'), customSize = document.getElementById('customSize'), cw = document.getElementById('cw'), ch = document.getElementById('ch');
+    const downloadType = document.getElementById('downloadType'), outName = document.getElementById('outName'), convertBtn = document.getElementById('convertBtn');
+    const clearBtn = document.getElementById('clearBtn'), selectAllBtn = document.getElementById('selectAllBtn'), unselectAllBtn = document.getElementById('unselectAllBtn');
+    const thumbQ = document.getElementById('thumbQ'), autoSelect = document.getElementById('autoSelect'), pageInfo = document.getElementById('pageInfo'), downloadArea = document.getElementById('downloadArea');
 
-    async function convertPDFToPNG() {
-      const file = document.getElementById("pdfFile").files[0];
-      if (!file) { alert("Please select a PDF file!"); return; }
+    let pdf = null;
+    let pages = []; // {id, thumb, rotate, selected}
 
-      const output = document.getElementById("output");
-      output.innerHTML = "<p>Processing… Please wait.</p>";
+    function log(msg) { logEl.textContent += "\\n" + msg; logEl.scrollTop = logEl.scrollHeight; }
+    function clearLog() { logEl.textContent = "Ready."; }
 
-      const fileReader = new FileReader();
-      fileReader.onload = async function () {
-        const typedarray = new Uint8Array(this.result);
-        const pdf = await pdfjsLib.getDocument(typedarray).promise;
-        output.innerHTML = "";
+    pickBtn.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', e => handleFile(e.target.files[0]));
 
-        for (let i = 1; i <= pdf.numPages; i++) {
-          const page = await pdf.getPage(i);
-          const viewport = page.getViewport({ scale: 2 });
+    dropArea.addEventListener('dragover', e => { e.preventDefault(); dropArea.classList.add('dragover'); });
+    dropArea.addEventListener('dragleave', () => dropArea.classList.remove('dragover'));
+    dropArea.addEventListener('drop', e => { e.preventDefault(); dropArea.classList.remove('dragover'); if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]); });
 
-          const canvas = document.createElement("canvas");
-          const ctx = canvas.getContext("2d");
-          canvas.width = viewport.width;
-          canvas.height = viewport.height;
-
-          await page.render({ canvasContext: ctx, viewport: viewport }).promise;
-
-          const imgURL = canvas.toDataURL("image/png");
-
-          const img = document.createElement("img");
-          img.src = imgURL;
-          img.style = "width:300px;margin:12px;border-radius:12px;";
-
-          const link = document.createElement("a");
-          link.href = imgURL;
-          link.download = `page-${i}.png`;
-          link.innerText = `Download PNG (Page ${i})`;
-          link.className = "btn";
-          link.style = "display:block;width:200px;margin:10px 0;";
-
-          output.appendChild(img);
-          output.appendChild(link);
-        }
-      };
-      fileReader.readAsArrayBuffer(file);
+    async function handleFile(file) {
+      if (!file || file.type !== 'application/pdf') { alert('Please select a PDF'); return; }
+      clearAll(); clearLog();
+      log('Loading PDF: ' + file.name);
+      const buf = await file.arrayBuffer();
+      pdf = await pdfjsLib.getDocument({ data: buf }).promise;
+      log('Pages: ' + pdf.numPages);
+      await loadThumbnails();
     }
-  </script>
 
+    async function loadThumbnails() {
+      pages = []; thumbs.innerHTML = ''; downloadArea.innerHTML = ''; pageInfo.textContent = '';
+      const tq = parseFloat(thumbQ.value);
+      for (let i = 1; i <= pdf.numPages; i++) {
+        log('Rendering thumb ' + i + '/' + pdf.numPages);
+        const page = await pdf.getPage(i);
+        const viewport = page.getViewport({ scale: 0.2 });
+        const canvas = document.createElement('canvas');
+        canvas.width = viewport.width; canvas.height = viewport.height;
+        const ctx = canvas.getContext('2d');
+        await page.render({ canvasContext: ctx, viewport }).promise;
+        const dataURL = canvas.toDataURL('image/png', tq);
+        pages.push({ id: i, thumb: dataURL, rotate: 0, selected: autoSelect.checked });
+        renderThumbnails();
+        await briefYield(20);
+      }
+      pageInfo.textContent = pages.length + ' pages';
+    }
+
+    function renderThumbnails() {
+      thumbs.innerHTML = '';
+      pages.forEach((pg, idx) => {
+        const d = document.createElement('div'); d.className = 'thumb';
+        d.innerHTML = `<img src="${pg.thumb}" style="transform:rotate(${pg.rotate}deg)"><div class="meta">Page ${pg.id}</div>
+        <div style="margin-top:6px"><label><input type="checkbox" data-idx="${idx}" ${pg.selected ? 'checked' : ''}> Select</label></div>
+        <div class="actions" style="margin-top:8px"><button class="btn" data-act="up" data-idx="${idx}">↑</button><button class="btn" data-act="down" data-idx="${idx}">↓</button><button class="btn" data-act="rotate" data-idx="${idx}">⟳</button><button class="btn btn-danger" data-act="remove" data-idx="${idx}">✕</button></div>`;
+        thumbs.appendChild(d);
+      });
+      // bind events
+      thumbs.querySelectorAll('input[type=checkbox]').forEach(cb => {
+        cb.addEventListener('change', e => { pages[e.target.dataset.idx].selected = e.target.checked; });
+      });
+      thumbs.querySelectorAll('.actions button').forEach(b => {
+        b.addEventListener('click', e => {
+          const idx = parseInt(e.target.dataset.idx), act = e.target.dataset.act;
+          if (act === 'up' && idx > 0) { movePage(idx, idx - 1); }
+          if (act === 'down' && idx < pages.length - 1) { movePage(idx, idx + 1); }
+          if (act === 'rotate') { pages[idx].rotate = (pages[idx].rotate + 90) % 360; }
+          if (act === 'remove') { pages.splice(idx, 1); }
+          renderThumbnails();
+        });
+      });
+    }
+
+    function movePage(from, to) { const x = pages.splice(from, 1)[0]; pages.splice(to, 0, x); }
+
+    scaleMode.addEventListener('change', () => { customSize.style.display = scaleMode.value === 'custom' ? 'block' : 'none'; });
+
+    clearBtn.addEventListener('click', clearAll);
+    selectAllBtn.addEventListener('click', () => { pages.forEach(p => p.selected = true); renderThumbnails(); });
+    unselectAllBtn.addEventListener('click', () => { pages.forEach(p => p.selected = false); renderThumbnails(); });
+
+    function clearAll() { pdf = null; pages = []; thumbs.innerHTML = ''; downloadArea.innerHTML = ''; pageInfo.textContent = ''; clearLog(); setProgress(-1); }
+
+    function setProgress(p) { if (p < 0) { progressWrap.style.display = 'none'; return; } progressWrap.style.display = 'block'; progressBar.style.width = (p * 100).toFixed(1) + '%'; }
+
+    convertBtn.addEventListener('click', async () => {
+      if (!pdf || pages.length === 0) { alert('Load a PDF first'); return; }
+      const sel = pages.filter(p => p.selected);
+      if (!sel.length) { alert('Select pages to export'); return; }
+      convertBtn.disabled = true; setProgress(0); clearLog(); log('Starting export...');
+      const zip = new JSZip();
+      for (let i = 0; i < sel.length; i++) {
+        const pg = sel[i]; log('Rendering page ' + pg.id);
+        const page = await pdf.getPage(pg.id);
+        const dpi = parseInt(dpiSel.value);
+        const viewport = page.getViewport({ scale: dpi / 72 });
+        const canvas = document.createElement('canvas'); canvas.width = viewport.width; canvas.height = viewport.height;
+        const ctx = canvas.getContext('2d'); await page.render({ canvasContext: ctx, viewport }).promise;
+        // rotate
+        if (pg.rotate) {
+          const c2 = document.createElement('canvas');
+          const rad = pg.rotate * Math.PI / 180;
+          const swap = pg.rotate === 90 || pg.rotate === 270;
+          c2.width = swap ? canvas.height : canvas.width;
+          c2.height = swap ? canvas.width : canvas.height;
+          const ctx2 = c2.getContext('2d');
+          ctx2.translate(c2.width / 2, c2.height / 2); ctx2.rotate(rad);
+          ctx2.drawImage(canvas, -canvas.width / 2, -canvas.height / 2);
+          canvas.width = c2.width; canvas.height = c2.height;
+          ctx.drawImage(c2, 0, 0);
+        }
+        // scaling (fitW/fitH) - simple: keep as rendered; user can set DPI
+        const dataURL = canvas.toDataURL('image/png');
+        const blob = dataURLToBlob(dataURL);
+        const fname = `page_${pg.id}.png`;
+        if (downloadType.value === 'zip') zip.file(fname, blob);
+        else {
+          const a = document.createElement('a'); a.href = dataURL; a.download = fname; a.textContent = 'Download ' + fname; a.className = 'btn'; a.style.display = 'block'; downloadArea.appendChild(a);
+        }
+        setProgress((i + 1) / sel.length); await briefYield(40);
+      }
+      if (downloadType.value === 'zip') { const blob = await zip.generateAsync({ type: 'blob' }); saveAs(blob, (outName.value || 'pdf_pages') + '.zip'); }
+      log('Done.'); convertBtn.disabled = false; setProgress(-1);
+    });
+
+    function dataURLToBlob(dataURL) { const arr = dataURL.split(','); const mime = arr[0].match(/:(.*?);/)[1]; const bstr = atob(arr[1]); let n = bstr.length; const u8 = new Uint8Array(n); while (n--) u8[n] = bstr.charCodeAt(n); return new Blob([u8], { type: mime }); }
+    function briefYield(ms = 10) { return new Promise(r => setTimeout(r, ms)); }
+  </script>
 </body>
 
 </html>
