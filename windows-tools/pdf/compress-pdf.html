@@ -1,116 +1,283 @@
+<!-- save as compress-heavy.html in your /windows-tools/pdf/ folder -->
 <!DOCTYPE html>
-<html lang="en">
+<html lang="mr">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Compress PDF – RDroid Apps</title>
-
-  <!-- Correct RDroidApps CSS -->
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Compress PDF (Heavy) – RDroid Apps</title>
   <link rel="stylesheet" href="../../css/style.css">
 
-  <!-- PDF-LIB -->
+  <!-- pdf.js (for rendering pages) and pdf-lib (for creating new PDF) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
 
   <style>
     .tool-section {
-      max-width: 700px;
+      max-width: 900px;
       margin: auto;
-      padding: 120px 20px 40px;
-      text-align: center;
+      padding: 100px 20px 40px;
+      color: #e6eef0;
     }
 
-    .tool-section h1 {
-      margin-bottom: 10px;
+    .tool-card {
+      background: #131619;
+      padding: 24px;
+      border-radius: 12px;
+      box-shadow: 0 0 12px rgba(0, 0, 0, 0.6);
     }
 
-    .tool-section p {
-      margin-bottom: 20px;
+    label {
+      color: #cfeee0;
+      display: block;
+      margin: 8px 0 4px;
     }
 
-    input[type="file"] {
-      margin: 20px 0;
+    input,
+    select {
+      width: 100%;
+      padding: 10px;
+      border-radius: 6px;
+      background: #0f1315;
+      color: #e6eef0;
+      border: 1px solid #2b2f33;
+    }
+
+    .row {
+      display: flex;
+      gap: 12px;
+      margin-top: 12px;
+      flex-wrap: wrap;
+    }
+
+    .col {
+      flex: 1 1 180px;
+      min-width: 160px;
+    }
+
+    .btn {
+      padding: 10px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .btn-primary {
+      background: #0aa37f;
+      color: #fff;
+      border: none;
+    }
+
+    #log {
+      margin-top: 12px;
+      color: #9fbfb0;
+      white-space: pre-wrap;
+      font-size: 13px;
+    }
+
+    .progress {
+      width: 100%;
+      height: 10px;
+      background: #0b0c0d;
+      border-radius: 6px;
+      overflow: hidden;
+      margin-top: 8px;
+    }
+
+    .bar {
+      height: 100%;
+      width: 0%;
+      background: #0aa37f;
+      transition: width .2s ease;
     }
   </style>
-
 </head>
 
 <body>
-
-  <!-- RDroidApps Header -->
   <header>
-    <button class="menu-btn" onclick="toggleMenu()">☰</button>
-    <div class="logo">
-      <img src="../../assets/my_brand_icon.png" alt="RDroid Logo" />
+    <button class="menu-btn" onclick="document.getElementById('drawer').classList.toggle('open')">☰</button>
+    <div class="logo"><img src="../../assets/my_brand_icon.png" alt="RDroid" />
       <div>RDroid <span>Apps</span></div>
     </div>
     <a href="/auth/login.html" class="login-btn">🔑 Login</a>
   </header>
 
-  <!-- Drawer Navigation -->
   <nav id="drawer">
     <a href="../../index.html">🏠 Home</a>
     <a href="../../apps.html">📱 Apps</a>
-    <a href="../../favorites.html">⭐ Favorites</a>
-    <a href="../../profile.html">👤 Profile</a>
-    <a href="../../about.html">ℹ️ About</a>
-    <a href="../../contact.html">✉️ Contact</a>
-    <a href="../../privacy-policy.html">🔒 Privacy Policy</a>
   </nav>
 
-  <!-- Tool Section -->
-  <div class="tool-section">
-    <h1>Compress PDF</h1>
-    <p>Reduce the file size of your PDF while keeping it readable.</p>
+  <section class="tool-section">
+    <div class="tool-card">
+      <h1>Compress PDF — Heavy (Image-rasterize)</h1>
+      <p style="color:#9fbfb0">Pages will be rasterized to images and re-packed. Use when you need big size reduction
+        (70–90%). Text will no longer be selectable.</p>
 
-    <input type="file" id="pdfFile" accept="application/pdf">
-    <button class="btn btn-primary" onclick="compressPDF()">Compress Now</button>
+      <label>Choose PDF</label>
+      <input type="file" id="fileInput" accept="application/pdf">
 
-    <div id="output" style="margin-top:25px;"></div>
-  </div>
+      <div class="row">
+        <div class="col">
+          <label>Target scale (relative)</label>
+          <select id="scaleSelect">
+            <option value="0.25">Very small (0.25×)</option>
+            <option value="0.5" selected>Medium (0.5×)</option>
+            <option value="0.75">High quality (0.75×)</option>
+            <option value="1">Original size (1×)</option>
+          </select>
+        </div>
 
-  <!-- Footer -->
-  <footer>
-    © 2025 RDroid Apps — PDF Tools
-  </footer>
+        <div class="col">
+          <label>JPEG quality (%)</label>
+          <input type="range" id="jpegQ" min="10" max="95" value="70">
+          <div id="jpegVal" style="color:#9fbfb0;margin-top:6px">Quality: 70%</div>
+        </div>
+
+        <div class="col">
+          <label>Max pages (for preview)</label>
+          <input type="number" id="maxPages" min="1" value="50" />
+        </div>
+      </div>
+
+      <div style="margin-top:12px; display:flex; gap:8px;">
+        <button class="btn btn-primary" id="startBtn">Compress Now</button>
+        <a class="btn" id="downloadLink" style="display:none">Download</a>
+      </div>
+
+      <div class="progress" style="display:none;margin-top:12px">
+        <div class="bar" id="progressBar"></div>
+      </div>
+      <div id="log"></div>
+    </div>
+  </section>
 
   <script>
-    // Drawer toggle
-    function toggleMenu() {
-      document.getElementById("drawer").classList.toggle("open");
+    // IMPORTANT: This approach rasterizes pages → text not selectable afterwards.
+    // Uses pdf.js to render, pdf-lib to create new PDF with embedded JPEGs.
+
+    const fileInput = document.getElementById('fileInput');
+    const startBtn = document.getElementById('startBtn');
+    const progressBar = document.getElementById('progressBar');
+    const progressWrap = document.querySelector('.progress');
+    const logEl = document.getElementById('log');
+    const jpegQ = document.getElementById('jpegQ');
+    const jpegVal = document.getElementById('jpegVal');
+    const scaleSelect = document.getElementById('scaleSelect');
+    const maxPagesInput = document.getElementById('maxPages');
+    const downloadLink = document.getElementById('downloadLink');
+
+    jpegQ.addEventListener('input', () => jpegVal.textContent = `Quality: ${jpegQ.value}%`);
+
+    function log(msg) {
+      console.log(msg);
+      logEl.textContent += msg + "\n";
     }
 
-    async function compressPDF() {
-      const file = document.getElementById("pdfFile").files[0];
-      if (!file) { alert("Please select a PDF file!"); return; }
+    function setProgress(p) {
+      progressWrap.style.display = p >= 0 ? 'block' : 'none';
+      progressBar.style.width = (p * 100).toFixed(1) + "%";
+    }
 
-      const output = document.getElementById("output");
-      output.innerHTML = "<p>Processing… Please wait.</p>";
+    startBtn.addEventListener('click', async () => {
+      logEl.textContent = "";
+      downloadLink.style.display = 'none';
+      const file = fileInput.files[0];
+      if (!file) { alert('कृपया PDF निवडा'); return; }
 
-      const typedArray = new Uint8Array(await file.arrayBuffer());
-      const pdfDoc = await PDFLib.PDFDocument.load(typedArray);
+      const scaleFactor = parseFloat(scaleSelect.value);
+      const quality = parseInt(jpegQ.value) / 100;
+      const maxPages = Math.max(1, parseInt(maxPagesInput.value) || 50);
 
+      log(`Starting compression — scale ${scaleFactor} ×, JPEG quality ${Math.round(quality * 100)}%`);
+      setProgress(0);
+
+      // load PDF with pdf.js
+      const arrayBuffer = await file.arrayBuffer();
+      const pdfData = new Uint8Array(arrayBuffer);
+
+      // Setup pdf.js worker
+      if (window.pdfjsLib) {
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+      } else {
+        alert('pdf.js not loaded');
+        return;
+      }
+
+      const pdf = await pdfjsLib.getDocument({ data: pdfData }).promise;
+      const totalPages = pdf.numPages;
+      log(`Pages in input: ${totalPages}`);
+
+      // create new PDF
       const newPdf = await PDFLib.PDFDocument.create();
-      const pages = await newPdf.copyPages(pdfDoc, pdfDoc.getPageIndices());
-      pages.forEach(page => newPdf.addPage(page));
 
-      const pdfBytes = await newPdf.save({ useObjectStreams: true });
+      // Iterate pages
+      const pagesToProcess = Math.min(totalPages, maxPages);
+      for (let i = 1; i <= pagesToProcess; i++) {
+        log(`Rendering page ${i} / ${pagesToProcess} ...`);
+        const page = await pdf.getPage(i);
 
-      const blob = new Blob([pdfBytes], { type: "application/pdf" });
-      const url = URL.createObjectURL(blob);
+        // Render page to an offscreen canvas with scale
+        const viewport = page.getViewport({ scale: 1.0 });
+        const renderWidth = Math.round(viewport.width * scaleFactor);
+        const renderHeight = Math.round(viewport.height * scaleFactor);
 
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = "compressed.pdf";
-      link.innerText = "Download Compressed PDF";
-      link.className = "btn";
-      link.style = "display:block;width:220px;margin:15px auto;";
+        // Create canvas
+        const canvas = document.createElement('canvas');
+        canvas.width = renderWidth;
+        canvas.height = renderHeight;
+        const ctx = canvas.getContext('2d');
 
-      output.innerHTML = "";
-      output.appendChild(link);
-    }
+        // render parameters
+        const renderContext = {
+          canvasContext: ctx,
+          viewport: page.getViewport({ scale: scaleFactor }),
+        };
+
+        await page.render(renderContext).promise;
+
+        // Convert canvas to JPEG blob
+        const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', quality));
+        const arrayBuf = await blob.arrayBuffer();
+        const jpgBytes = new Uint8Array(arrayBuf);
+
+        // embed in pdf-lib
+        const imgEmbed = await newPdf.embedJpg(jpgBytes);
+        const imgDims = imgEmbed.scale(1);
+
+        // add a page sized to the embedded image
+        const pdfPage = newPdf.addPage([imgDims.width, imgDims.height]);
+        pdfPage.drawImage(imgEmbed, {
+          x: 0,
+          y: 0,
+          width: imgDims.width,
+          height: imgDims.height,
+        });
+
+        setProgress(i / pagesToProcess);
+        // small yield for UI
+        await new Promise(r => setTimeout(r, 50));
+      }
+
+      // If original had more pages than maxPages, append note page
+      if (totalPages > pagesToProcess) {
+        log(`Note: processed first ${pagesToProcess} pages only (maxPages).`);
+        const notePage = newPdf.addPage([500, 200]);
+        notePage.drawText(`Original PDF had ${totalPages} pages. This compressed file contains first ${pagesToProcess} pages.`, { x: 20, y: 120, size: 12, color: PDFLib.rgb(0.16, 0.67, 0.5) });
+      }
+
+      log('Saving compressed PDF (this may take a few seconds)...');
+      const pdfBytes = await newPdf.save();
+      const outBlob = new Blob([pdfBytes], { type: 'application/pdf' });
+      const outUrl = URL.createObjectURL(outBlob);
+
+      // show download link and size info
+      downloadLink.href = outUrl;
+      downloadLink.download = file.name.replace(/\.[^/.]+$/, '') + '-compressed.pdf';
+      downloadLink.textContent = 'Download compressed PDF';
+      downloadLink.style.display = 'inline-block';
+      log(`Done. Original: ${(file.size / 1024).toFixed(1)} KB, Compressed: ${(outBlob.size / 1024).toFixed(1)} KB`);
+      setProgress(1);
+    });
   </script>
-
 </body>
 
 </html>
