@@ -117,6 +117,21 @@ nav a {
 }
 nav a:hover { color: var(--brand); }
 
+header .nav-links {
+  display: flex;
+  gap: 18px;
+}
+
+header .nav-links a {
+  color: var(--muted);
+  font-weight: 500;
+}
+
+header .nav-links a.active,
+header .nav-links a:hover {
+  color: var(--brand);
+}
+
 /* Hero Section */
 .wrap { max-width: 1200px; margin: auto; padding: 100px 24px 60px; }
 
