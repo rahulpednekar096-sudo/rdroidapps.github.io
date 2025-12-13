@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="mr">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Convert Audio — RDroid Apps</title>
+    <link rel="stylesheet" href="../../css/style.css">
+</head>
+
+<body>
+    <!-- ===== HEADER (UNCHANGED) ===== -->
+    <header>
+        <button class="menu-btn" onclick="toggleMenu()">☰</button>
+        <div class="logo">
+            <img src="../../assets/my_brand_icon.png" alt="RDroid" />
+            <div>RDroid <span>Apps</span></div>
+        </div>
+        <div class="nav-links">
+            <a href="../../index.html" class="active">Home</a>
+            <a href="../../apps.html">Apps</a>
+            <a href="../../about.html">About</a>
+            <a href="../../contact.html">Contact</a>
+            <a href="../../windows-tools.html">Windows Tools</a>
+        </div>
+        <a href="../../auth/login.html" class="login-btn">🔑 Login</a>
+    </header>
+
+    <!-- ===== DRAWER (UNCHANGED) ===== -->
+    <nav id="drawer">
+        <a href="../../index.html">🏠 Home</a>
+        <a href="../../apps.html">📱 Apps</a>
+        <a href="../../favorites.html">⭐ Favorites</a>
+        <a href="../../profile.html">👤 Profile</a>
+        <a href="../../about.html">ℹ️ About</a>
+        <a href="../../contact.html">✉️ Contact</a>
+        <a href="../../privacy-policy.html">🔒 Privacy Policy</a>
+    </nav>
+    <section class="tool-section">
+        <div class="card">
+            <h1>Convert Audio</h1>
+            <p class="note">
+                Convert audio by changing sample rate.<br>
+                <b>Note:</b> Browser exports WAV only (MP3 not supported).
+            </p>
+
+            <button class="btn btn-ghost" id="pick">🎵 Upload Audio</button>
+            <input type="file" id="file" accept="audio/*" hidden>
+
+            <div class="row">
+                <h3>Input Audio</h3>
+                <pre id="inputInfo">No file loaded.</pre>
+            </div>
+
+            <div class="row">
+                <label>Output Sample Rate</label>
+                <select id="rate">
+                    <option value="44100">44100 Hz (CD)</option>
+                    <option value="48000">48000 Hz (Studio)</option>
+                </select>
+            </div>
+
+            <div class="actions">
+                <button class="btn" id="previewBtn">▶ Preview</button>
+                <button class="btn btn-primary" id="convertBtn" disabled>Convert</button>
+                <button class="btn btn-ghost" id="resetBtn">Reset</button>
+                <a id="download" class="btn" style="display:none">Download</a>
+            </div>
+
+            <pre id="status">Upload an audio file.</pre>
+        </div>
+    </section>
+    <!-- ===== FOOTER (UNCHANGED) ===== -->
+    <footer>© 2025 RDroid Apps — Audio Tools</footer>
+    <script>
+        function toggleMenu() {
+            document.getElementById('drawer').classList.toggle('open');
+        }
+        const ctx = new AudioContext();
+        let buffer = null;
+        let previewSrc = null;
+
+        const pick = document.getElementById("pick");
+        const file = document.getElementById("file");
+        const rateSel = document.getElementById("rate");
+        const inputInfo = document.getElementById("inputInfo");
+        const previewBtn = document.getElementById("previewBtn");
+        const convertBtn = document.getElementById("convertBtn");
+        const resetBtn = document.getElementById("resetBtn");
+        const download = document.getElementById("download");
+        const status = document.getElementById("status");
+
+        pick.onclick = () => file.click();
+
+        file.onchange = async () => {
+            status.textContent = "Loading audio…";
+            buffer = await ctx.decodeAudioData(await file.files[0].arrayBuffer());
+
+            inputInfo.textContent =
+                "Duration: " + buffer.duration.toFixed(2) + " sec\n" +
+                "Channels: " + buffer.numberOfChannels + "\n" +
+                "Sample Rate: " + buffer.sampleRate + " Hz";
+
+            convertBtn.disabled = false;
+            status.textContent = "Audio loaded.";
+        };
+
+        previewBtn.onclick = () => {
+            if (!buffer) return alert("Upload audio first");
+            if (previewSrc) previewSrc.stop();
+
+            previewSrc = ctx.createBufferSource();
+            previewSrc.buffer = buffer;
+            previewSrc.connect(ctx.destination);
+            previewSrc.start();
+        };
+
+        convertBtn.onclick = async () => {
+            if (!buffer) return;
+
+            convertBtn.disabled = true;
+            status.textContent = "Converting…";
+
+            const outRate = parseInt(rateSel.value, 10);
+            const newLength = Math.floor(buffer.duration * outRate);
+
+            const off = new OfflineAudioContext(
+                buffer.numberOfChannels,
+                newLength,
+                outRate
+            );
+
+            const src = off.createBufferSource();
+            src.buffer = buffer;
+            src.connect(off.destination);
+            src.start();
+
+            const out = await off.startRendering();
+            const blob = new Blob([audioBufferToWav(out)], { type: "audio/wav" });
+
+            download.href = URL.createObjectURL(blob);
+            download.download = "converted-" + outRate + "Hz.wav";
+            download.style.display = "inline-block";
+
+            status.textContent = "Conversion complete.";
+            convertBtn.disabled = false;
+        };
+
+        resetBtn.onclick = () => {
+            if (previewSrc) previewSrc.stop();
+            buffer = null;
+            inputInfo.textContent = "No file loaded.";
+            status.textContent = "Reset.";
+            convertBtn.disabled = true;
+            download.style.display = "none";
+        };
+
+        function audioBufferToWav(buffer) {
+            const ch = buffer.numberOfChannels;
+            const len = buffer.length * ch * 2 + 44;
+            const view = new DataView(new ArrayBuffer(len));
+            let p = 0;
+            const w = s => { for (let i = 0; i < s.length; i++) view.setUint8(p++, s.charCodeAt(i)); };
+
+            w("RIFF"); view.setUint32(p, 36 + buffer.length * ch * 2, true); p += 4;
+            w("WAVEfmt "); view.setUint32(p, 16, true); p += 4;
+            view.setUint16(p, 1, true); p += 2;
+            view.setUint16(p, ch, true); p += 2;
+            view.setUint32(p, buffer.sampleRate, true); p += 4;
+            view.setUint32(p, buffer.sampleRate * ch * 2, true); p += 4;
+            view.setUint16(p, ch * 2, true); p += 2;
+            view.setUint16(p, 16, true); p += 2;
+            w("data"); view.setUint32(p, buffer.length * ch * 2, true); p += 4;
+
+            for (let i = 0; i < buffer.length; i++) {
+                for (let c = 0; c < ch; c++) {
+                    let s = Math.max(-1, Math.min(1, buffer.getChannelData(c)[i]));
+                    view.setInt16(p, s < 0 ? s * 0x8000 : s * 0x7fff, true);
+                    p += 2;
+                }
+            }
+            return view;
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="mr">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Extract Audio from Video — RDroid Apps</title>
+    <link rel="stylesheet" href="../../css/style.css">
+</head>
+
+<body>
+    <!-- ===== HEADER (UNCHANGED) ===== -->
+    <header>
+        <button class="menu-btn" onclick="toggleMenu()">☰</button>
+        <div class="logo">
+            <img src="../../assets/my_brand_icon.png" alt="RDroid" />
+            <div>RDroid <span>Apps</span></div>
+        </div>
+        <div class="nav-links">
+            <a href="../../index.html" class="active">Home</a>
+            <a href="../../apps.html">Apps</a>
+            <a href="../../about.html">About</a>
+            <a href="../../contact.html">Contact</a>
+            <a href="../../windows-tools.html">Windows Tools</a>
+        </div>
+        <a href="../../auth/login.html" class="login-btn">🔑 Login</a>
+    </header>
+
+    <!-- ===== DRAWER (UNCHANGED) ===== -->
+    <nav id="drawer">
+        <a href="../../index.html">🏠 Home</a>
+        <a href="../../apps.html">📱 Apps</a>
+        <a href="../../favorites.html">⭐ Favorites</a>
+        <a href="../../profile.html">👤 Profile</a>
+        <a href="../../about.html">ℹ️ About</a>
+        <a href="../../contact.html">✉️ Contact</a>
+        <a href="../../privacy-policy.html">🔒 Privacy Policy</a>
+    </nav>
+    <section class="tool-section">
+        <div class="card">
+            <h1>Extract Audio</h1>
+            <p class="note">
+                Extract audio track from video file.<br>
+                <b>Note:</b> Browser exports clean WAV (MP3 not supported without ffmpeg).
+            </p>
+
+            <button class="btn btn-ghost" id="pick">🎬 Upload Video</button>
+            <input type="file" id="file" accept="video/*" hidden>
+
+            <div class="row">
+                <b>Video info:</b>
+                <pre id="info">No file loaded.</pre>
+            </div>
+
+            <div class="actions">
+                <button class="btn btn-primary" id="extractBtn" disabled>Extract Audio</button>
+                <button class="btn btn-ghost" id="resetBtn">Reset</button>
+                <a id="download" class="btn" style="display:none">Download</a>
+            </div>
+
+            <pre id="status">Waiting for video…</pre>
+        </div>
+    </section>
+    <!-- ===== FOOTER (UNCHANGED) ===== -->
+    <footer>© 2025 RDroid Apps — Audio Tools</footer>
+    <script>
+        function toggleMenu() {
+            document.getElementById('drawer').classList.toggle('open');
+        }
+        const ctx = new AudioContext();
+        let videoEl = document.createElement("video");
+        let audioBuffer = null;
+
+        const pick = document.getElementById("pick");
+        const file = document.getElementById("file");
+        const extractBtn = document.getElementById("extractBtn");
+        const resetBtn = document.getElementById("resetBtn");
+        const download = document.getElementById("download");
+        const info = document.getElementById("info");
+        const status = document.getElementById("status");
+
+        pick.onclick = () => file.click();
+
+        file.onchange = async () => {
+            status.textContent = "Loading video…";
+            const url = URL.createObjectURL(file.files[0]);
+            videoEl.src = url;
+            videoEl.muted = true;
+
+            await videoEl.play().catch(() => { }); // allow metadata load
+            videoEl.pause();
+
+            const stream = videoEl.captureStream();
+            const audioTrack = stream.getAudioTracks()[0];
+            if (!audioTrack) {
+                status.textContent = "No audio track found.";
+                return;
+            }
+
+            const mediaStream = new MediaStream([audioTrack]);
+            const source = ctx.createMediaStreamSource(mediaStream);
+            const recorder = ctx.createMediaStreamDestination();
+            source.connect(recorder);
+
+            const rec = new MediaRecorder(recorder.stream);
+            let chunks = [];
+
+            rec.ondataavailable = e => chunks.push(e.data);
+            rec.onstop = async () => {
+                const blob = new Blob(chunks);
+                audioBuffer = await ctx.decodeAudioData(await blob.arrayBuffer());
+
+                info.textContent =
+                    "Duration: " + audioBuffer.duration.toFixed(2) + " sec\n" +
+                    "Channels: " + audioBuffer.numberOfChannels + "\n" +
+                    "Sample Rate: " + audioBuffer.sampleRate + " Hz";
+
+                extractBtn.disabled = false;
+                status.textContent = "Audio ready to export.";
+            };
+
+            rec.start();
+            videoEl.currentTime = 0;
+            videoEl.play();
+            setTimeout(() => rec.stop(), videoEl.duration * 1000);
+        };
+
+        extractBtn.onclick = () => {
+            if (!audioBuffer) return;
+            const wav = audioBufferToWav(audioBuffer);
+            download.href = URL.createObjectURL(new Blob([wav], { type: "audio/wav" }));
+            download.download = "extracted-audio.wav";
+            download.style.display = "inline-block";
+            status.textContent = "Extraction complete.";
+        };
+
+        resetBtn.onclick = () => {
+            audioBuffer = null;
+            info.textContent = "No file loaded.";
+            status.textContent = "Reset.";
+            extractBtn.disabled = true;
+            download.style.display = "none";
+        };
+
+        function audioBufferToWav(buffer) {
+            const ch = buffer.numberOfChannels;
+            const len = buffer.length * ch * 2 + 44;
+            const view = new DataView(new ArrayBuffer(len));
+            let p = 0;
+            const w = s => { for (let i = 0; i < s.length; i++) view.setUint8(p++, s.charCodeAt(i)); };
+
+            w("RIFF"); view.setUint32(p, 36 + buffer.length * ch * 2, true); p += 4;
+            w("WAVEfmt "); view.setUint32(p, 16, true); p += 4;
+            view.setUint16(p, 1, true); p += 2;
+            view.setUint16(p, ch, true); p += 2;
+            view.setUint32(p, buffer.sampleRate, true); p += 4;
+            view.setUint32(p, buffer.sampleRate * ch * 2, true); p += 4;
+            view.setUint16(p, ch * 2, true); p += 2;
+            view.setUint16(p, 16, true); p += 2;
+            w("data"); view.setUint32(p, buffer.length * ch * 2, true); p += 4;
+
+            for (let i = 0; i < buffer.length; i++) {
+                for (let c = 0; c < ch; c++) {
+                    let s = Math.max(-1, Math.min(1, buffer.getChannelData(c)[i]));
+                    view.setInt16(p, s < 0 ? s * 0x8000 : s * 0x7fff, true);
+                    p += 2;
+                }
+            }
+            return view;
+        }
+    </script>
+</body>
+
+</html>

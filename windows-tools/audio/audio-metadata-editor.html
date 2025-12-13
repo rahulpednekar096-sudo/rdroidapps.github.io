@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="mr">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Audio Metadata Editor — RDroid Apps</title>
+    <link rel="stylesheet" href="../../css/style.css">
+
+</head>
+
+<body>
+    <!-- ===== HEADER (UNCHANGED) ===== -->
+    <header>
+        <button class="menu-btn" onclick="toggleMenu()">☰</button>
+        <div class="logo">
+            <img src="../../assets/my_brand_icon.png" alt="RDroid" />
+            <div>RDroid <span>Apps</span></div>
+        </div>
+        <div class="nav-links">
+            <a href="../../index.html" class="active">Home</a>
+            <a href="../../apps.html">Apps</a>
+            <a href="../../about.html">About</a>
+            <a href="../../contact.html">Contact</a>
+            <a href="../../windows-tools.html">Windows Tools</a>
+        </div>
+        <a href="../../auth/login.html" class="login-btn">🔑 Login</a>
+    </header>
+
+    <!-- ===== DRAWER (UNCHANGED) ===== -->
+    <nav id="drawer">
+        <a href="../../index.html">🏠 Home</a>
+        <a href="../../apps.html">📱 Apps</a>
+        <a href="../../favorites.html">⭐ Favorites</a>
+        <a href="../../profile.html">👤 Profile</a>
+        <a href="../../about.html">ℹ️ About</a>
+        <a href="../../contact.html">✉️ Contact</a>
+        <a href="../../privacy-policy.html">🔒 Privacy Policy</a>
+    </nav>
+    <section class="tool-section">
+        <div class="card">
+            <h1>Audio Metadata Editor</h1>
+            <p class="note">
+                View audio information and remove metadata safely.<br>
+                <b>Note:</b> Browser cannot edit MP3 tags. Clean WAV export removes metadata completely.
+            </p>
+
+            <button class="btn btn-ghost" id="pick">🎵 Upload Audio</button>
+            <input type="file" id="file" accept="audio/*" hidden>
+
+            <div class="meta-box">
+                <h3>Audio Info</h3>
+                <pre id="info">No file loaded.</pre>
+            </div>
+
+            <div class="actions">
+                <button class="btn btn-primary" id="cleanBtn" disabled>
+                    🧹 Remove Metadata (Clean WAV)
+                </button>
+                <button class="btn btn-ghost" id="resetBtn">Reset</button>
+                <a id="download" class="btn" style="display:none">Download</a>
+            </div>
+
+            <pre id="status">Waiting for audio…</pre>
+        </div>
+    </section>
+    <!-- ===== FOOTER (UNCHANGED) ===== -->
+    <footer>© 2025 RDroid Apps — Audio Tools</footer>
+    <script>
+        function toggleMenu() {
+            document.getElementById('drawer').classList.toggle('open');
+        }
+        const ctx = new AudioContext();
+        let buffer = null;
+
+        const pick = document.getElementById("pick");
+        const file = document.getElementById("file");
+        const info = document.getElementById("info");
+        const cleanBtn = document.getElementById("cleanBtn");
+        const resetBtn = document.getElementById("resetBtn");
+        const download = document.getElementById("download");
+        const status = document.getElementById("status");
+
+        pick.onclick = () => file.click();
+
+        file.onchange = async () => {
+            status.textContent = "Loading audio…";
+            buffer = await ctx.decodeAudioData(await file.files[0].arrayBuffer());
+
+            info.textContent =
+                "Duration: " + buffer.duration.toFixed(2) + " sec\n" +
+                "Channels: " + buffer.numberOfChannels + "\n" +
+                "Sample Rate: " + buffer.sampleRate + " Hz\n\n" +
+                "Metadata:\n" +
+                "- ID3 tags: Not editable in browser\n" +
+                "- Cover art: Removed on WAV export";
+
+            cleanBtn.disabled = false;
+            status.textContent = "Audio loaded.";
+        };
+
+        cleanBtn.onclick = () => {
+            if (!buffer) return;
+
+            status.textContent = "Removing metadata…";
+            const wav = audioBufferToWav(buffer);
+            const blob = new Blob([wav], { type: "audio/wav" });
+
+            download.href = URL.createObjectURL(blob);
+            download.download = "clean-audio.wav";
+            download.style.display = "inline-block";
+
+            status.textContent = "Metadata removed. Download ready.";
+        };
+
+        resetBtn.onclick = () => {
+            buffer = null;
+            info.textContent = "No file loaded.";
+            status.textContent = "Reset.";
+            download.style.display = "none";
+            cleanBtn.disabled = true;
+        };
+
+        function audioBufferToWav(buffer) {
+            const ch = buffer.numberOfChannels;
+            const len = buffer.length * ch * 2 + 44;
+            const view = new DataView(new ArrayBuffer(len));
+            let p = 0;
+            const w = s => { for (let i = 0; i < s.length; i++) view.setUint8(p++, s.charCodeAt(i)); };
+
+            w("RIFF"); view.setUint32(p, 36 + buffer.length * ch * 2, true); p += 4;
+            w("WAVEfmt "); view.setUint32(p, 16, true); p += 4;
+            view.setUint16(p, 1, true); p += 2;
+            view.setUint16(p, ch, true); p += 2;
+            view.setUint32(p, buffer.sampleRate, true); p += 4;
+            view.setUint32(p, buffer.sampleRate * ch * 2, true); p += 4;
+            view.setUint16(p, ch * 2, true); p += 2;
+            view.setUint16(p, 16, true); p += 2;
+            w("data"); view.setUint32(p, buffer.length * ch * 2, true); p += 4;
+
+            for (let i = 0; i < buffer.length; i++) {
+                for (let c = 0; c < ch; c++) {
+                    let s = Math.max(-1, Math.min(1, buffer.getChannelData(c)[i]));
+                    view.setInt16(p, s < 0 ? s * 0x8000 : s * 0x7fff, true);
+                    p += 2;
+                }
+            }
+            return view;
+        }
+    </script>
+
+
+</body>
+
+</html>
