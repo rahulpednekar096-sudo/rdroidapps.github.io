@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -212,6 +213,7 @@
         opacity: 0;
         transform: translateY(-10px);
       }
+
       to {
         opacity: 1;
         transform: translateY(0);
@@ -247,10 +249,17 @@
   <header>
     <button class="menu-btn" onclick="toggleMenu()">☰</button>
     <div class="logo">
-      <img src="assets/my_brand_icon.png" alt="RDroid Logo" />
+      <img src="../../assets/my_brand_icon.png" alt="RDroid" />
       <div>RDroid <span>Apps</span></div>
     </div>
-    <a href="/auth/login.html" class="login-btn">Login</a>
+    <div class="nav-links">
+      <a href="../../index.html" class="active">Home</a>
+      <a href="../../apps.html">Apps</a>
+      <a href="../../about.html">About</a>
+      <a href="../../contact.html">Contact</a>
+      <a href="../../windows-tools.html">Windows Tools</a>
+    </div>
+    <a href="../../auth/login.html" class="login-btn">🔑 Login</a>
   </header>
 
   <!-- Navigation Drawer -->
@@ -348,11 +357,11 @@
     async function loadProfileData(user) {
       try {
         const profile = await window.rdroidAuth.fetchProfile(user.uid);
-        
+
         if (profile) {
           document.getElementById('profileNameDisplay').textContent = profile.name || 'N/A';
           document.getElementById('profileEmailDisplay').textContent = user.email;
-          
+
           if (profile.createdAt) {
             const date = new Date(profile.createdAt.seconds * 1000).toLocaleDateString();
             document.getElementById('profileCreatedDisplay').textContent = date;
@@ -406,7 +415,7 @@
 
     async function saveName() {
       const newName = document.getElementById('editNameInput').value.trim();
-      
+
       if (!newName) {
         showError('Name cannot be empty');
         return;
@@ -444,4 +453,5 @@
     }
   </script>
 </body>
+
 </html>
