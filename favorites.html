@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -151,7 +152,9 @@
     }
 
     @keyframes spin {
-      to { transform: rotate(360deg); }
+      to {
+        transform: rotate(360deg);
+      }
     }
 
     .app-icon {
@@ -182,10 +185,17 @@
   <header>
     <button class="menu-btn" onclick="toggleMenu()">☰</button>
     <div class="logo">
-      <img src="assets/my_brand_icon.png" alt="RDroid Logo" />
+      <img src="../../assets/my_brand_icon.png" alt="RDroid" />
       <div>RDroid <span>Apps</span></div>
     </div>
-    <a href="/auth/login.html" class="login-btn">🔑 Login</a>
+    <div class="nav-links">
+      <a href="../../index.html" class="active">Home</a>
+      <a href="../../apps.html">Apps</a>
+      <a href="../../about.html">About</a>
+      <a href="../../contact.html">Contact</a>
+      <a href="../../windows-tools.html">Windows Tools</a>
+    </div>
+    <a href="../../auth/login.html" class="login-btn">🔑 Login</a>
   </header>
 
   <!-- Navigation Drawer -->
@@ -319,7 +329,7 @@
       emptyEl.querySelector('p').textContent = 'Please try again later.';
     }
 
-    window.removeFavorite = async function(appId, btn) {
+    window.removeFavorite = async function (appId, btn) {
       try {
         const user = window.rdroidAuth.getCurrentUser();
         if (!user) {
@@ -329,14 +339,14 @@
 
         btn.disabled = true;
         await window.rdroidAuth.toggleFavorite(user.uid, appId);
-        
+
         // Remove card with animation
         const card = btn.closest('.favorite-card');
         card.style.opacity = '0';
         card.style.transform = 'translateY(10px)';
         setTimeout(() => {
           card.remove();
-          
+
           // Check if no favorites left
           const grid = document.getElementById('favoritesGrid');
           if (grid.children.length === 0) {
@@ -356,4 +366,5 @@
   <!-- Main UI Script -->
   <script src="js/script.js"></script>
 </body>
+
 </html>
