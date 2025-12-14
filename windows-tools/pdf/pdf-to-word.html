@@ -16,100 +16,7 @@
   <!-- OCR (optional) -->
   <script src="https://unpkg.com/tesseract.js@v4.1.1/dist/tesseract.min.js"></script>
 
-  <style>
-    :root {
-      --card: #131619;
-      --muted: #9fbfb0;
-      --accent: #0aa37f;
-    }
 
-    body {
-      margin-top: 100px;
-    }
-
-    .menu-btn {
-      background: transparent;
-      border: none;
-      color: var(--accent);
-      font-size: 20px;
-      cursor: pointer;
-    }
-
-
-    .section {
-      max-width: 980px;
-      margin: 40px auto;
-      padding: 22px;
-      background: var(--card);
-      border-radius: 12px
-    }
-
-    h1 {
-      margin: 0 0 6px
-    }
-
-    p.lead {
-      color: var(--muted)
-    }
-
-    .drop {
-      border: 2px dashed #222;
-      padding: 18px;
-      border-radius: 10px;
-      text-align: center;
-      color: var(--muted);
-      cursor: pointer
-    }
-
-    .thumbs {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-top: 10px
-    }
-
-    .thumb img {
-      width: 110px;
-      border-radius: 6px
-    }
-
-    .btn {
-      padding: 10px 12px;
-      border-radius: 8px;
-      cursor: pointer
-    }
-
-    .btn-primary {
-      background: #0aa37f;
-      color: #fff;
-      border: none
-    }
-
-    .progress {
-      height: 10px;
-      background: #0b0c0d;
-      border-radius: 8px;
-      margin-top: 12px;
-      display: none
-    }
-
-    .bar {
-      height: 100%;
-      width: 0;
-      background: var(--accent)
-    }
-
-    .log {
-      background: #0b0c0d;
-      padding: 10px;
-      border-radius: 8px;
-      color: var(--muted);
-      height: 150px;
-      overflow: auto;
-      margin-top: 12px;
-      font-size: 13px
-    }
-  </style>
 </head>
 
 <body>
@@ -117,13 +24,20 @@
   <header>
     <button class="menu-btn" onclick="toggleMenu()">☰</button>
     <div class="logo">
-      <img src="../../assets/my_brand_icon.png" alt="RDroid Logo" />
+      <img src="../../assets/my_brand_icon.png" alt="RDroid" />
       <div>RDroid <span>Apps</span></div>
     </div>
-    <a href="/auth/login.html" class="login-btn">🔑 Login</a>
+    <div class="nav-links">
+      <a href="../../index.html" class="active">Home</a>
+      <a href="../../apps.html">Apps</a>
+      <a href="../../about.html">About</a>
+      <a href="../../contact.html">Contact</a>
+      <a href="../../windows-tools.html">Windows Tools</a>
+    </div>
+    <a href="../../auth/login.html" class="login-btn">🔑 Login</a>
   </header>
 
-  <!-- Drawer Navigation -->
+  <!-- ===== DRAWER (UNCHANGED) ===== -->
   <nav id="drawer">
     <a href="../../index.html">🏠 Home</a>
     <a href="../../apps.html">📱 Apps</a>
