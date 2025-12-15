@@ -4,7 +4,10 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Compress PDF — Heavy (Upgraded) – RDroid Apps</title>
+  <title>Compress PDF Online (Heavy) – Free & Secure – RDroid Apps</title>
+  <meta name="description"
+    content="Compress PDF online with heavy compression. Reduce large PDF size quickly without upload. Free, fast & privacy-focused tool by RDroidApps.">
+
   <link rel="stylesheet" href="../../css/style.css">
 
   <!-- pdf.js + pdf-lib + tesseract (optional) -->
@@ -32,6 +35,29 @@
     </div>
     <a href="../../auth/login.html" class="login-btn">🔑 Login</a>
   </header>
+
+  <!-- Tools Quick Links -->
+  <section class="tools-quick-links">
+    <div class="tools-scroll">
+      <a href="compress-pdf.html" class="tool-btn">Compress PDF</a>
+      <a href="excel-to-pdf.html" class="tool-btn">Excel to PDF</a>
+      <a href="jpg-to-pdf.html" class="tool-btn">JPG to PDF</a>
+      <a href="merge-pdf.html" class="tool-btn">Merge PDF</a>
+      <a href="pdf-to-excel.html" class="tool-btn">PDF to Excel</a>
+      <a href="pdf-to-jpg.html" class="tool-btn">PDF to JPG</a>
+      <a href="pdf-to-png.html" class="tool-btn">PDF to PNG</a>
+      <a href="pdf-to-ppt.html" class="tool-btn">PDF to PPT</a>
+      <a href="pdf-to-text.html" class="tool-btn">PDF to text</a>
+      <a href="pdf-to-word.html" class="tool-btn">PDF to Word</a>
+      <a href="png-to-pdf.html" class="tool-btn">Png to PDF</a>
+      <a href="ppt-to-pdf.html" class="tool-btn">PPT to PDF</a>
+      <a href="protect-unlock-pdf.html" class="tool-btn">protect/unlock pdf</a>
+      <a href="rotate-pdf.html" class="tool-btn">Rotate PDF</a>
+      <a href="split-pdf.html" class="tool-btn">Split PDF</a>
+      <a href="text-to-pdf.html" class="tool-btn">Text-to-PDF</a>
+      <a href="word-to-pdf.html" class="tool-btn">Word to PDF</a>
+    </div>
+  </section>
 
   <!-- ===== DRAWER (UNCHANGED) ===== -->
   <nav id="drawer">
@@ -99,6 +125,91 @@
 
       <pre id="log">Ready.</pre>
       <div id="warning" style="color:#ffb199; margin-top:8px"></div>
+
+      <!-- SEO Content -->
+      <hr style="margin:32px 0">
+
+      <section class="seo-content">
+
+        <h2>Compress PDF Online – Heavy Compression Tool</h2>
+
+        <p>
+          Compress PDF Online (Heavy) is an advanced and privacy-focused PDF compression tool from RDroidApps.
+          This tool is specially designed to compress large size, image-heavy PDF documents.
+          This PDF compressor is very useful for students, teachers, office users, designers and business professionals.
+        </p>
+
+        <p>
+          This tool runs entirely in the browser. Your PDF file is not uploaded to any server,
+          So your data is 100% safe.
+          Large scanned PDFs, camera-generated PDFs or image-based documents
+          are very large in size. Such files are required to be compressed for e-mail, WhatsApp or upload.
+        </p>
+
+        <h2>How Heavy PDF Compression Works</h2>
+
+        <p>
+          In Heavy compression mode, each page in the PDF is converted into a high-quality JPEG image
+          and then re-packed into an optimized PDF.
+          This can reduce the file size by 60% to 90%.
+          This method is best for image-heavy PDFs.
+        </p>
+
+        <p>
+          Please note: Heavy compression does not allow text to be selectable.
+          If you want the text to be different, you can use the optional OCR summary feature,
+          which extracts text from PDF and gives it in summary format.
+        </p>
+
+        <h2>Key Features of This PDF Compressor</h2>
+
+        <ul>
+          <li>✔ Free online PDF compression – no signup required</li>
+          <li>✔ Heavy compression for large image-based PDFs</li>
+          <li>✔ Works fully offline in your browser</li>
+          <li>✔ No file upload, no tracking, complete privacy</li>
+          <li>✔ Adjustable image quality and scale</li>
+          <li>✔ Optional OCR text summary</li>
+        </ul>
+
+        <h2>Why Choose RDroidApps PDF Tools?</h2>
+
+        <p>
+          All PDF tools of RDroidApps are based on privacy, speed and simplicity.
+          In many other online tools, files are uploaded to the server,
+          But in RDroidApps, the processing is done on your device.
+          Therefore, this tool is safe for confidential documents.
+        </p>
+        <p>
+          The user interface is simple and easy to use.
+          Just select your PDF file, choose compression settings and click "Compress Now".
+          The compressed PDF will be ready in seconds.
+        </p>
+
+
+        <h2>Frequently Asked Questions (FAQ)</h2>
+
+        <h3>Is this PDF compression tool free?</h3>
+        <p>
+          Yes. Compress PDF Online - Heavy tool is completely free
+          and there is no limit or watermark.
+        </p>
+
+        <h3>Are my PDF files uploaded to a server?</h3>
+        <p>
+          No. All processing takes place in your browser.
+          Your PDF file is not uploaded anywhere.
+        </p>
+
+        <h3>Will text remain selectable after compression?</h3>
+        <p>
+          In Heavy compression, text is not selectable.
+          But using the optional OCR feature, text summary can be obtained.
+        </p>
+
+      </section>
+
+
     </div>
 
     <footer>© 2025 RDroid Apps — PDF Tools</footer>
@@ -335,6 +446,25 @@
     });
 
   </script>
+  <script>
+    (function () {
+      const currentPage = window.location.pathname.split("/").pop().toLowerCase();
+      const toolButtons = document.querySelectorAll(".tools-quick-links .tool-btn");
+
+      toolButtons.forEach(btn => {
+        // आधी सगळ्यांमधून active काढ
+        btn.classList.remove("active");
+
+        const btnPage = btn.getAttribute("href").toLowerCase();
+
+        if (btnPage === currentPage) {
+          btn.classList.add("active");
+        }
+      });
+    })();
+  </script>
+
+
 </body>
 
 </html>
