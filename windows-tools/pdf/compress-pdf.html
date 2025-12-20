@@ -7,7 +7,9 @@
   <title>Compress PDF Online (Heavy) – Free & Secure – RDroid Apps</title>
   <meta name="description"
     content="Compress PDF online with heavy compression. Reduce large PDF size quickly without upload. Free, fast & privacy-focused tool by RDroidApps.">
-
+  <meta name="keywords"
+    content="compress pdf online, heavy pdf compression, reduce pdf size, free pdf compressor, secure pdf tool, rdroidapps pdf tools">
+  <link rel="canonical" href="https://rdroidapps.com/windows-tools/pdf/compress-pdf.html">
   <link rel="stylesheet" href="../../css/style.css">
 
   <!-- pdf.js + pdf-lib + tesseract (optional) -->
@@ -15,60 +17,33 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
   <script src="https://unpkg.com/tesseract.js@v4.1.1/dist/tesseract.min.js"></script>
 
+  <!-- Include jQuery for load function -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+
 
 </head>
 
 <body>
-  <!-- RDroidApps Header -->
-  <header>
-    <button class="menu-btn" onclick="toggleMenu()">☰</button>
-    <div class="logo">
-      <img src="../../assets/my_brand_icon.png" alt="RDroid" />
-      <div>RDroid <span>Apps</span></div>
-    </div>
-    <div class="nav-links">
-      <a href="../../index.html" class="active">Home</a>
-      <a href="../../apps.html">Apps</a>
-      <a href="../../about.html">About</a>
-      <a href="../../contact.html">Contact</a>
-      <a href="../../windows-tools.html">Windows Tools</a>
-    </div>
-    <a href="../../auth/login.html" class="login-btn">🔑 Login</a>
-  </header>
+  <!-- HEADER (loaded from external file) -->
+  <div id="header-container"></div>
 
-  <!-- Tools Quick Links -->
-  <section class="tools-quick-links">
-    <div class="tools-scroll">
-      <a href="compress-pdf.html" class="tool-btn">Compress PDF</a>
-      <a href="excel-to-pdf.html" class="tool-btn">Excel to PDF</a>
-      <a href="jpg-to-pdf.html" class="tool-btn">JPG to PDF</a>
-      <a href="merge-pdf.html" class="tool-btn">Merge PDF</a>
-      <a href="pdf-to-excel.html" class="tool-btn">PDF to Excel</a>
-      <a href="pdf-to-jpg.html" class="tool-btn">PDF to JPG</a>
-      <a href="pdf-to-png.html" class="tool-btn">PDF to PNG</a>
-      <a href="pdf-to-ppt.html" class="tool-btn">PDF to PPT</a>
-      <a href="pdf-to-text.html" class="tool-btn">PDF to text</a>
-      <a href="pdf-to-word.html" class="tool-btn">PDF to Word</a>
-      <a href="png-to-pdf.html" class="tool-btn">Png to PDF</a>
-      <a href="ppt-to-pdf.html" class="tool-btn">PPT to PDF</a>
-      <a href="protect-unlock-pdf.html" class="tool-btn">protect/unlock pdf</a>
-      <a href="rotate-pdf.html" class="tool-btn">Rotate PDF</a>
-      <a href="split-pdf.html" class="tool-btn">Split PDF</a>
-      <a href="text-to-pdf.html" class="tool-btn">Text-to-PDF</a>
-      <a href="word-to-pdf.html" class="tool-btn">Word to PDF</a>
-    </div>
-  </section>
+  <!-- TOOLS QUICK LINKS (loaded from external file) -->
+  <div id="tools-links-container"></div>
 
-  <!-- ===== DRAWER (UNCHANGED) ===== -->
-  <nav id="drawer">
-    <a href="../../index.html">🏠 Home</a>
-    <a href="../../apps.html">📱 Apps</a>
-    <a href="../../favorites.html">⭐ Favorites</a>
-    <a href="../../profile.html">👤 Profile</a>
-    <a href="../../about.html">ℹ️ About</a>
-    <a href="../../contact.html">✉️ Contact</a>
-    <a href="../../privacy-policy.html">🔒 Privacy Policy</a>
-  </nav>
+  <!-- MENU DRAWER (loaded from external file) -->
+  <div id="menu-drawer-container"></div>
+
+  <!-- Load all components -->
+  <script>
+    $(function () {
+      $("#header-container").load("../../components/header.html");
+      $("#menu-drawer-container").load("../../components/menu-drawer.html");
+      $("#tools-links-container").load("../../components/pdf-tools-quick-links.html");
+      $("#footer-container").load("../../components/footer.html");
+    });
+  </script>
+
   <section class="tool-section">
     <div class="card">
       <h1>Compress PDF — Heavy (Upgraded)</h1>
@@ -111,7 +86,7 @@
       </div>
 
       <div style="margin-top:12px; display:flex; gap:8px; align-items:center;">
-        <button class="btn btn-primary" id="startBtn">Compress Now</button>
+        <button class="btn btn-primary" id="startBtn">Compress PDF</button>
         <button class="btn btn-ghost" id="cancelBtn" style="display:none">Cancel</button>
         <a id="downloadLink" class="btn" style="display:none"></a>
         <div style="margin-left:auto" id="sizeInfo"></div>
@@ -166,6 +141,8 @@
         <ul>
           <li>✔ Free online PDF compression – no signup required</li>
           <li>✔ Heavy compression for large image-based PDFs</li>
+          <li>✔ Works fully offline in your browser</li>
+          <li>✔ No file upload, no tracking, complete privacy</li>
           <li>✔ Adjustable image quality and scale</li>
           <li>✔ Optional OCR text summary</li>
         </ul>
@@ -210,9 +187,10 @@
 
     </div>
 
-    <footer>© 2025 RDroid Apps — PDF Tools</footer>
-  </section>
 
+  </section>
+  <!-- FOOTER (loaded from external file) -->
+  <div id="footer-container"></div>
   <script>
     // Drawer toggle
     function toggleMenu() {
@@ -444,26 +422,9 @@
     });
 
   </script>
-  <script>
-    (function () {
-      const currentPage = window.location.pathname.split("/").pop().toLowerCase();
-      const toolButtons = document.querySelectorAll(".tools-quick-links .tool-btn");
 
-      toolButtons.forEach(btn => {
-        // आधी सगळ्यांमधून active काढ
-        btn.classList.remove("active");
-
-        const btnPage = btn.getAttribute("href").toLowerCase();
-
-        if (btnPage === currentPage) {
-          btn.classList.add("active");
-        }
-      });
-    })();
-  </script>
 
 
 </body>
 
 </html>
-
