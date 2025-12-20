@@ -5,6 +5,13 @@
   <meta charset="utf-8">
   <title>Word (DOCX) → PDF — RDroid Apps</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <!-- SEO Meta Tags -->
+  <meta name="description"
+    content="Convert Word (DOCX) files to PDF instantly using RDroidApps Pro. Fully offline, secure, browser-based Word to PDF converter with page size, margins, and orientation options.">
+
+  <meta name="keywords"
+    content="Word to PDF, DOCX to PDF, online Word to PDF converter, offline Word to PDF, RDroidApps tools, free PDF tools, document converter, Word PDF Pro">
+
   <link rel="stylesheet" href="../../css/style.css">
 
   <!-- docx parser -->
@@ -13,37 +20,29 @@
   <!-- jsPDF -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
-
+  <!-- Include jQuery for load function -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 
 <body>
-  <!-- RDroidApps Header -->
-  <header>
-    <button class="menu-btn" onclick="toggleMenu()">☰</button>
-    <div class="logo">
-      <img src="../../assets/my_brand_icon.png" alt="RDroid" />
-      <div>RDroid <span>Apps</span></div>
-    </div>
-    <div class="nav-links">
-      <a href="../../index.html" class="active">Home</a>
-      <a href="../../apps.html">Apps</a>
-      <a href="../../about.html">About</a>
-      <a href="../../contact.html">Contact</a>
-      <a href="../../windows-tools.html">Windows Tools</a>
-    </div>
-    <a href="../../auth/login.html" class="login-btn">🔑 Login</a>
-  </header>
+  <!-- HEADER (loaded from external file) -->
+  <div id="header-container"></div>
 
-  <!-- ===== DRAWER (UNCHANGED) ===== -->
-  <nav id="drawer">
-    <a href="../../index.html">🏠 Home</a>
-    <a href="../../apps.html">📱 Apps</a>
-    <a href="../../favorites.html">⭐ Favorites</a>
-    <a href="../../profile.html">👤 Profile</a>
-    <a href="../../about.html">ℹ️ About</a>
-    <a href="../../contact.html">✉️ Contact</a>
-    <a href="../../privacy-policy.html">🔒 Privacy Policy</a>
-  </nav>
+  <!-- TOOLS QUICK LINKS (loaded from external file) -->
+  <div id="tools-links-container"></div>
+
+  <!-- MENU DRAWER (loaded from external file) -->
+  <div id="menu-drawer-container"></div>
+
+  <!-- Load all components -->
+  <script>
+    $(function () {
+      $("#header-container").load("../../components/header.html");
+      $("#menu-drawer-container").load("../../components/menu-drawer.html");
+      $("#tools-links-container").load("../../components/pdf-tools-quick-links.html");
+      $("#footer-container").load("../../components/footer.html");
+    });
+  </script>
   <section class="section">
 
     <h1>Word (DOCX) → PDF</h1>
@@ -71,7 +70,7 @@
       <input type="number" id="margin" value="10">
     </div>
 
-    <button class="btn-primary" id="convertBtn" style="margin-top:12px">Convert to PDF</button>
+    <button class="btn btn-primary" id="convertBtn" style="margin-top:12px">Convert Word to PDF</button>
 
     <div class="progress" id="progressWrap">
       <div class="bar" id="progressBar"></div>
@@ -83,9 +82,27 @@
     <pre id="log" class="log">Ready.</pre>
 
     <div id="download"></div>
+    <section class="seo-content">
+      <h2>Word to PDF Converter — RDroidApps Pro</h2>
+
+      <p>
+        Convert Microsoft Word documents (DOCX) into high-quality PDF files using
+        RDroidApps Pro. The entire conversion happens inside your browser, keeping
+        your documents secure and private.
+      </p>
+
+      <h2>Key Features</h2>
+      <ul>
+        <li>DOCX to PDF conversion</li>
+        <li>Page size, margins & orientation control</li>
+        <li>Live document preview</li>
+        <li>Offline & privacy-safe processing</li>
+      </ul>
+    </section>
 
   </section>
-  <footer>© 2025 RDroid Apps — PDF Tools</footer>
+  <!-- FOOTER (loaded from external file) -->
+  <div id="footer-container"></div>
   <script>
     // Drawer toggle
     function toggleMenu() {
@@ -170,7 +187,6 @@
       setProgress(-1);
     };
   </script>
-
 </body>
 
 </html>
