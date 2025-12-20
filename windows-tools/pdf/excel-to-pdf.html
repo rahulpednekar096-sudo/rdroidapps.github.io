@@ -5,6 +5,10 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Excel → PDF — RDroidApps Pro</title>
+  <meta name="description"
+    content="Convert Excel spreadsheets (.xlsx, .xls, .csv) to PDF documents with multi-sheet support, headers/footers, pagination, and more — all client-side in your browser." />
+  <meta name="keywords"
+    content="excel to pdf, xlsx to pdf, xls to pdf, csv to pdf, online excel converter, multi-sheet pdf, client-side pdf conversion" />
 
   <!-- Stylesheet (RDroidApps theme) -->
   <link rel="stylesheet" href="../../css/style.css">
@@ -16,42 +20,37 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 
+  <!-- Include jQuery for load function -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+
 
 </head>
 
 <body>
-  <!-- RDroidApps Header -->
-  <header>
-    <button class="menu-btn" onclick="toggleMenu()">☰</button>
-    <div class="logo">
-      <img src="../../assets/my_brand_icon.png" alt="RDroid" />
-      <div>RDroid <span>Apps</span></div>
-    </div>
-    <div class="nav-links">
-      <a href="../../index.html" class="active">Home</a>
-      <a href="../../apps.html">Apps</a>
-      <a href="../../about.html">About</a>
-      <a href="../../contact.html">Contact</a>
-      <a href="../../windows-tools.html">Windows Tools</a>
-    </div>
-    <a href="../../auth/login.html" class="login-btn">🔑 Login</a>
-  </header>
+  <!-- HEADER (loaded from external file) -->
+  <div id="header-container"></div>
 
-  <!-- ===== DRAWER (UNCHANGED) ===== -->
-  <nav id="drawer">
-    <a href="../../index.html">🏠 Home</a>
-    <a href="../../apps.html">📱 Apps</a>
-    <a href="../../favorites.html">⭐ Favorites</a>
-    <a href="../../profile.html">👤 Profile</a>
-    <a href="../../about.html">ℹ️ About</a>
-    <a href="../../contact.html">✉️ Contact</a>
-    <a href="../../privacy-policy.html">🔒 Privacy Policy</a>
-  </nav>
+  <!-- TOOLS QUICK LINKS (loaded from external file) -->
+  <div id="tools-links-container"></div>
+
+  <!-- MENU DRAWER (loaded from external file) -->
+  <div id="menu-drawer-container"></div>
+
+  <!-- Load all components -->
+  <script>
+    $(function () {
+      $("#header-container").load("../../components/header.html");
+      $("#menu-drawer-container").load("../../components/menu-drawer.html");
+      $("#tools-links-container").load("../../components/pdf-tools-quick-links.html");
+      $("#footer-container").load("../../components/footer.html");
+    });
+  </script>
 
   <div class="container" role="main">
     <div class="header">
       <div>
-        <div class="h1">Excel → PDF — RDroidApps Pro</div>
+        <h1>Excel → PDF — RDroidApps Pro</h1>
         <div class="lead">Multi-sheet export, header/footer, pagination, repeat header, image embedding, ZIP output —
           client-side.</div>
       </div>
@@ -143,7 +142,7 @@
         </div>
 
         <div style="margin-top:10px;display:flex;gap:8px;align-items:center;">
-          <button class="btn-primary" id="convertBtn">Convert → PDF</button>
+          <button class="btn btn-primary" id="mergeBtn">Convert Excel to PDF</button>
           <button class="btn" id="previewBtn">Preview Sheet</button>
           <button class="btn" id="clearBtn">Clear</button>
           <div style="margin-left:auto" class="small" id="infoLabel"></div>
@@ -164,8 +163,61 @@
         <div class="previewWrap" id="previewWrap">No preview yet.</div>
       </div>
     </div>
+    <!-- SEO Content -->
+    <pre id="log">Ready.</pre>
+    <div id="warning" style="color:#ffb199; margin-top:8px"></div>
+    <hr style="margin:32px 0">
+
+    <section class="seo-content">
+      <h2>Excel to PDF Converter — RDroidApps Pro</h2>
+
+      <p>
+        The Excel to PDF Converter by RDroidApps Pro is a powerful online tool that allows you to convert Excel
+        spreadsheets (.xlsx, .xls, .csv) into high-quality PDF documents directly in your browser. With support for
+        multiple sheets, customizable page settings, and advanced features like headers, footers, and pagination,
+        this tool is perfect for professionals and students alike.
+      </p>
+
+      <h2>Key Features of Excel to PDF Converter</h2>
+
+      <ul>
+        <li><strong>Multi-Sheet Export:</strong> Select multiple sheets from your Excel file to include in the PDF
+          output.
+        </li>
+        <li><strong>Custom Page Settings:</strong> Choose page size (A4, Letter, Custom), orientation (portrait,
+          landscape), and margins to suit your needs.</li>
+        <li><strong>Header and Footer Support:</strong> Add custom headers and footers with dynamic tokens like sheet
+          name, page number, and total pages.</li>
+        <li><strong>Repeat Header Rows:</strong> Ensure table headers are repeated on each new page for better
+          readability.</li>
+        <li><strong>Auto-Fit Columns:</strong> Automatically adjust column widths to fit the page layout.</li>
+        <li><strong>Multiple Output Options:</strong> Export as a single PDF, one PDF per sheet in a ZIP file, or
+          download multiple PDFs individually.</li>
+        <li><strong>Client-Side Processing:</strong> All conversions are done locally in your browser, ensuring your
+          data remains private and secure.</li>
+      </ul>
+
+      <h2>How to Use the Excel to PDF Converter</h2>
+
+      <ol>
+        <li><strong>Select Your File:</strong> Click the "Choose file" button or drag and drop your Excel file into the
+          designated area.</li>
+        <li><strong>Load Sheets:</strong> After the file is loaded, click "Load" to populate the list of sheets
+          available
+          for export.</li>
+        <li><strong>Select Sheets:</strong> Choose one or more sheets from the list. You can use the "Select All" or
+          "Clear" buttons for convenience.</li>
+        <li><strong>Configure Settings:</strong> Adjust page size, orientation, margins, output mode, and other options
+          as needed.</li>
+        <li><strong>Convert to PDF:</strong> Click the "Convert → PDF" button to start the conversion process. Once
+          complete, download your PDF(s) as per your selected output mode.</li>
+      </ol>
+
+    </section>
+
   </div>
-  <div class="footer">© 2025 RDroid Apps — PDF Tools</div>
+  <!-- FOOTER (loaded from external file) -->
+  <div id="footer-container"></div>
   <script>
     // Drawer toggle
     function toggleMenu() {
@@ -655,6 +707,8 @@
     })();
 
   </script>
+
+
 </body>
 
 </html>
