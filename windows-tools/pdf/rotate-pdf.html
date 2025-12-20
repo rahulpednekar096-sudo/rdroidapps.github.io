@@ -4,6 +4,11 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="description"
+    content="PDF पानांची per-page किंवा global rotation (0°, 90°, 180°, 270°). हे pdf-lib वापरून पानांच्या rotation matrix मध्ये बदल करते — lossless." />
+  <meta name="keywords"
+    content="rotate pdf, pdf rotation, rotate pdf pages, per-page pdf rotate, global pdf rotate, pdf-lib, pdf tools, rdroid apps" />
+
   <title>Rotate PDF — RDroid Apps</title>
   <link rel="stylesheet" href="../../css/style.css">
 
@@ -14,37 +19,30 @@
   <!-- FileSaver -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 
-
+  <!-- Include jQuery for load function -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 
 <body>
-  <!-- RDroidApps Header -->
-  <header>
-    <button class="menu-btn" onclick="toggleMenu()">☰</button>
-    <div class="logo">
-      <img src="../../assets/my_brand_icon.png" alt="RDroid" />
-      <div>RDroid <span>Apps</span></div>
-    </div>
-    <div class="nav-links">
-      <a href="../../index.html" class="active">Home</a>
-      <a href="../../apps.html">Apps</a>
-      <a href="../../about.html">About</a>
-      <a href="../../contact.html">Contact</a>
-      <a href="../../windows-tools.html">Windows Tools</a>
-    </div>
-    <a href="../../auth/login.html" class="login-btn">🔑 Login</a>
-  </header>
+  <!-- HEADER (loaded from external file) -->
+  <div id="header-container"></div>
 
-  <!-- ===== DRAWER (UNCHANGED) ===== -->
-  <nav id="drawer">
-    <a href="../../index.html">🏠 Home</a>
-    <a href="../../apps.html">📱 Apps</a>
-    <a href="../../favorites.html">⭐ Favorites</a>
-    <a href="../../profile.html">👤 Profile</a>
-    <a href="../../about.html">ℹ️ About</a>
-    <a href="../../contact.html">✉️ Contact</a>
-    <a href="../../privacy-policy.html">🔒 Privacy Policy</a>
-  </nav>
+  <!-- TOOLS QUICK LINKS (loaded from external file) -->
+  <div id="tools-links-container"></div>
+
+  <!-- MENU DRAWER (loaded from external file) -->
+  <div id="menu-drawer-container"></div>
+
+  <!-- Load all components -->
+  <script>
+    $(function () {
+      $("#header-container").load("../../components/header.html");
+      $("#menu-drawer-container").load("../../components/menu-drawer.html");
+      $("#tools-links-container").load("../../components/pdf-tools-quick-links.html");
+      $("#footer-container").load("../../components/footer.html");
+    });
+  </script>
+
   <div class="container">
     <h1>Rotate PDF</h1>
     <p class="lead">Per-page or global rotation (0°, 90°, 180°, 270°). This uses pdf-lib to modify page rotation matrix
@@ -68,7 +66,7 @@
           <option value="270">270°</option>
           <option value="0">0° (reset)</option>
         </select>
-        <div style="margin-top:8px"><button class="btn-primary" id="applyBtn">Apply</button></div>
+        <div style="margin-top:8px"><button class="btn btn-primary" id="applyBtn">Apply</button></div>
       </div>
 
       <div class="control">
@@ -88,8 +86,51 @@
       <div class="bar" id="progressBar"></div>
     </div>
     <pre class="log" id="log">Ready.</pre>
+    <!-- SEO Content -->
+    <pre id="log">Ready.</pre>
+    <div id="warning" style="color:#ffb199; margin-top:8px"></div>
+    <hr style="margin:32px 0">
+
+    <section class="seo-content">
+      <h2>Rotate PDF Converter — RDroidApps Pro</h2>
+
+      <p>
+        Our Rotate PDF tool allows you to easily adjust the orientation of your PDF documents. Whether you need to
+        rotate individual pages or apply a global rotation to the entire document, our tool has you covered. With
+        support
+        for common rotation angles (90°, 180°, 270°, and reset to 0°), you can ensure your PDFs are always displayed
+        correctly.
+      </p>
+      <h3>Key Features:</h3>
+      <ul>
+        <li><strong>Per-Page Rotation:</strong> Select specific pages to rotate, giving you full control over your PDF's
+          layout.</li>
+        <li><strong>Global Rotation:</strong> Apply a uniform rotation to all pages in the document with a single click.
+        </li>
+        <li><strong>Lossless Editing:</strong> Our tool uses pdf-lib to modify the page rotation matrix without
+          re-encoding, ensuring no loss in quality.</li>
+        <li><strong>User-Friendly Interface:</strong> An intuitive design makes it easy for users of all skill levels to
+          rotate PDFs quickly and efficiently.</li>
+      </ul>
+      <h3>How to Use the Rotate PDF Tool:</h3>
+      <ol>
+        <li><strong>Upload Your PDF:</strong> Click on the "Choose file" button or drag and drop your PDF document into
+          the designated area.</li>
+        <li><strong>Select Rotation Options:</strong> Choose whether to rotate specific pages or all pages, and select
+          the desired rotation angle (90°, 180°, 270°, or 0° to reset).</li>
+        <li><strong>Apply Rotation:</strong> Click the "Apply" button to process the rotation. The updated PDF will be
+          prepared for download.</li>
+        <li><strong>Download:</strong> Once the rotation is applied, click the download button to save your rotated PDF
+          document.</li>
+      </ol>
+      <p>
+        Try our Rotate PDF tool today and ensure your documents are always presented in the correct orientation with
+        ease!
+      </p>
+    </section>
   </div>
-  <footer>© 2025 RDroid Apps — PDF Tools</footer>
+  <!-- FOOTER (loaded from external file) -->
+  <div id="footer-container"></div>
   <script>
     // Drawer toggle
     function toggleMenu() {
@@ -189,6 +230,7 @@
       } finally { setProgress(-1); }
     });
   </script>
+
 </body>
 
 </html>
