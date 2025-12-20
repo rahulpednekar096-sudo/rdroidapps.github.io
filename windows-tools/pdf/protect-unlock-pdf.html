@@ -4,6 +4,11 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="description"
+    content="PDF लॉक करण्याचा किंवा अनलॉक करण्याचा practical tool. (Browser-side मर्यादा — कृपया खालील Notes वाचा.)" />
+  <meta name="keywords"
+    content="protect pdf, unlock pdf, pdf password remover, pdf password protector, pdf encryption, pdf decryption, pdf tools, rdroid apps" />
+
   <title>Protect / Unlock PDF — RDroid Apps</title>
   <link rel="stylesheet" href="../../css/style.css">
 
@@ -13,37 +18,30 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
 
-
+  <!-- Include jQuery for load function -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 
 <body>
-  <!-- RDroidApps Header -->
-  <header>
-    <button class="menu-btn" onclick="toggleMenu()">☰</button>
-    <div class="logo">
-      <img src="../../assets/my_brand_icon.png" alt="RDroid" />
-      <div>RDroid <span>Apps</span></div>
-    </div>
-    <div class="nav-links">
-      <a href="../../index.html" class="active">Home</a>
-      <a href="../../apps.html">Apps</a>
-      <a href="../../about.html">About</a>
-      <a href="../../contact.html">Contact</a>
-      <a href="../../windows-tools.html">Windows Tools</a>
-    </div>
-    <a href="../../auth/login.html" class="login-btn">🔑 Login</a>
-  </header>
+  <!-- HEADER (loaded from external file) -->
+  <div id="header-container"></div>
 
-  <!-- ===== DRAWER (UNCHANGED) ===== -->
-  <nav id="drawer">
-    <a href="../../index.html">🏠 Home</a>
-    <a href="../../apps.html">📱 Apps</a>
-    <a href="../../favorites.html">⭐ Favorites</a>
-    <a href="../../profile.html">👤 Profile</a>
-    <a href="../../about.html">ℹ️ About</a>
-    <a href="../../contact.html">✉️ Contact</a>
-    <a href="../../privacy-policy.html">🔒 Privacy Policy</a>
-  </nav>
+  <!-- TOOLS QUICK LINKS (loaded from external file) -->
+  <div id="tools-links-container"></div>
+
+  <!-- MENU DRAWER (loaded from external file) -->
+  <div id="menu-drawer-container"></div>
+
+  <!-- Load all components -->
+  <script>
+    $(function () {
+      $("#header-container").load("../../components/header.html");
+      $("#menu-drawer-container").load("../../components/menu-drawer.html");
+      $("#tools-links-container").load("../../components/pdf-tools-quick-links.html");
+      $("#footer-container").load("../../components/footer.html");
+    });
+  </script>
+
   <div class="container">
     <h1>Protect / Unlock PDF</h1>
     <p class="lead">PDF लॉक करण्याचा किंवा अनलॉक करण्याचा practical tool. (Browser-side मर्यादा — कृपया खालील Notes
@@ -83,7 +81,7 @@
         <input type="text" id="outName" value="output"
           style="width:100%;padding:8px;margin-top:6px;background:#090b0c;border:1px solid #222;color:#e6eef0;border-radius:6px">
         <div style="margin-top:12px;">
-          <button class="btn-primary" id="runBtn">Run</button>
+          <button class="btn btn-primary" id="runBtn">Run</button>
           <button class="btn" id="clearBtn">Clear</button>
         </div>
       </div>
@@ -111,9 +109,51 @@
           provide that script).</li>
       </ul>
     </div>
+    <!-- SEO Content -->
+    <pre id="log">Ready.</pre>
+    <div id="warning" style="color:#ffb199; margin-top:8px"></div>
+    <hr style="margin:32px 0">
+
+    <section class="seo-content">
+      <h2>Protect/Unlock PDF Converter — RDroidApps Pro</h2>
+
+      <p>
+        Need to secure your PDF documents or remove existing password protection? Our Protect/Unlock PDF tool offers a
+        practical solution for managing PDF security directly in your browser. Whether you want to protect your PDFs
+        with a password or unlock them for easier access, our tool has you covered.
+      </p>
+      <h3>Key Features:</h3>
+      <ul>
+        <li><strong>Protect PDF:</strong> Secure your PDF files by creating a password-protected ZIP archive. This
+          method
+          ensures that your documents are safely stored and can only be accessed by those with the correct password.
+        </li>
+        <li><strong>Unlock PDF:</strong> Remove password protection from your PDFs by providing the current password.
+          The tool will render the pages and create an unlocked, image-based PDF, preserving visual fidelity.</li>
+        <li><strong>User-Friendly Interface:</strong> Our intuitive design makes it easy for users of all skill levels
+          to
+          manage PDF security quickly and efficiently.</li>
+      </ul>
+      <h3>How to Use the Protect/Unlock PDF Tool:</h3>
+      <ol>
+        <li><strong>Select Mode:</strong> Choose between "Protect" to create a password-protected ZIP or "Unlock" to
+          remove password protection from your PDF.</li>
+        <li><strong>Upload PDF:</strong> Drag and drop your PDF file into the designated area or use the "Choose file"
+          button to select it from your device.</li>
+        <li><strong>Set Password:</strong> For protection, enter a password for the ZIP archive. For unlocking, provide
+          the current PDF password.</li>
+        <li><strong>Run:</strong> Click the "Run" button to start the process. The tool will handle the rest and provide
+          you with the secured or unlocked PDF.</li>
+      </ol>
+      <p>
+        Experience the convenience of managing PDF security with our easy-to-use Protect/Unlock PDF tool. Start securing
+        or unlocking your PDFs today!
+      </p>
+    </section>
 
   </div>
-  <footer>© 2025 RDroid Apps — PDF Tools</footer>
+  <!-- FOOTER (loaded from external file) -->
+  <div id="footer-container"></div>
   <script>
     // Drawer toggle
     function toggleMenu() {
@@ -282,6 +322,7 @@
 
     function briefYield(ms = 20) { return new Promise(r => setTimeout(r, ms)); }
   </script>
+
 </body>
 
 </html>
