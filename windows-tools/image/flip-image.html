@@ -6,35 +6,30 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Flip Image — RDroid Apps</title>
     <link rel="stylesheet" href="../../css/style.css">
+
+    <!-- Include jQuery for load function -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 
 <body>
-    <header>
-        <button class="menu-btn" onclick="toggleMenu()">☰</button>
-        <div class="logo">
-            <img src="../../assets/my_brand_icon.png" alt="RDroid" />
-            <div>RDroid <span>Apps</span></div>
-        </div>
-        <div class="nav-links">
-            <a href="../../index.html" class="active">Home</a>
-            <a href="../../apps.html">Apps</a>
-            <a href="../../about.html">About</a>
-            <a href="../../contact.html">Contact</a>
-            <a href="../../windows-tools.html">Windows Tools</a>
-        </div>
-        <a href="../../auth/login.html" class="login-btn">🔑 Login</a>
-    </header>
+    <!-- HEADER (loaded from external file) -->
+    <div id="header-container"></div>
 
-    <!-- ===== DRAWER (UNCHANGED) ===== -->
-    <nav id="drawer">
-        <a href="../../index.html">🏠 Home</a>
-        <a href="../../apps.html">📱 Apps</a>
-        <a href="../../favorites.html">⭐ Favorites</a>
-        <a href="../../profile.html">👤 Profile</a>
-        <a href="../../about.html">ℹ️ About</a>
-        <a href="../../contact.html">✉️ Contact</a>
-        <a href="../../privacy-policy.html">🔒 Privacy Policy</a>
-    </nav>
+    <!-- TOOLS QUICK LINKS (loaded from external file) -->
+    <div id="tools-links-container"></div>
+
+    <!-- MENU DRAWER (loaded from external file) -->
+    <div id="menu-drawer-container"></div>
+
+    <!-- Load all components -->
+    <script>
+        $(function () {
+            $("#header-container").load("../../components/header.html");
+            $("#menu-drawer-container").load("../../components/menu-drawer.html");
+            $("#tools-links-container").load("../../components/image-tools-quick-links.html");
+            $("#footer-container").load("../../components/footer.html");
+        });
+    </script>
 
     <section class="tool-section">
         <div class="card">
@@ -56,9 +51,9 @@
             <div id="preview" style="margin-top:12px"></div>
             <pre id="log">Ready.</pre>
         </div>
-        <footer>© 2025 RDroid Apps — Image Tools</footer>
     </section>
-
+    <!-- FOOTER (loaded from external file) -->
+    <div id="footer-container"></div>
     <script>
         function toggleMenu() { document.getElementById('drawer').classList.toggle('open') }
         const pickBtn = document.getElementById('pickBtn'), fileInput = document.getElementById('fileInput'), dropArea = document.getElementById('dropArea'),
@@ -85,6 +80,23 @@
             }
             reader.readAsDataURL(currentFile);
         });
+    </script>
+    <script>
+        (function () {
+            const currentPage = window.location.pathname.split("/").pop().toLowerCase();
+            const toolButtons = document.querySelectorAll(".tools-quick-links .tool-btn");
+
+            toolButtons.forEach(btn => {
+                // आधी सगळ्यांमधून active काढ
+                btn.classList.remove("active");
+
+                const btnPage = btn.getAttribute("href").toLowerCase();
+
+                if (btnPage === currentPage) {
+                    btn.classList.add("active");
+                }
+            });
+        })();
     </script>
 </body>
 
