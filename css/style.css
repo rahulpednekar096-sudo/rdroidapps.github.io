@@ -28,15 +28,15 @@
 /* Reset + Basics */
 * {
   box-sizing: border-box;
-  margin: 0;
+  margin: 10;
   padding: 0;
 }
 
 body {
   background:
     linear-gradient(180deg,
-      rgba(3, 23, 61, 0.92),
-      rgba(2, 65, 138, 0.85)),
+      rgba(3, 23, 61, 0.651),
+      rgba(2, 65, 138, 0.651)),
     url("/assets/bg-blue-dots.jpg");
   /* तुझा image path */
 
@@ -628,7 +628,7 @@ footer {
 }
 
 .card {
-  background: #131619;
+  background: var(--card);
   padding: 22px;
   border-radius: 12px;
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6)
@@ -644,7 +644,8 @@ p.note {
 }
 
 .drop {
-  border: 2px dashed #202426;
+  border: 2px dashed rgba(56, 189, 248, .35);
+  background: rgba(73, 4, 42, 0.932);
   padding: 18px;
   border-radius: 10px;
   text-align: center;
@@ -681,7 +682,7 @@ input[type=number] {
   width: 100%;
   padding: 8px;
   border-radius: 8px;
-  background: #0f1315;
+  background: #0f3547;
   color: #e6eef0;
   border: 1px solid #2b2f33
 }
@@ -721,7 +722,7 @@ input[type=number] {
 }
 
 pre#log {
-  background: #0b0c0d;
+  background: #001221a1;
   padding: 12px;
   border-radius: 8px;
   color: #9fbfb0;
@@ -763,7 +764,7 @@ pre#log {
 
 .sidebar {
   width: 250px;
-  background: #131619;
+  background: #07417a;
   border-radius: 10px;
   padding: 20px;
   height: fit-content;
@@ -779,7 +780,7 @@ pre#log {
   width: 100%;
   padding: 10px;
   margin-bottom: 10px;
-  background: #1a1d21;
+  background: #0067ba;
   color: #fff;
   border: none;
   border-radius: 6px;
@@ -793,7 +794,7 @@ pre#log {
 }
 
 .sidebar button:hover {
-  background: #22262a;
+  background: #01386e;
 }
 
 .sidebar button.active {
@@ -806,7 +807,7 @@ pre#log {
 
 .tools-list {
   flex: 1;
-  background: #131619;
+  background: #004B87;
   border-radius: 10px;
   padding: 25px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.6);
@@ -818,7 +819,8 @@ pre#log {
 
 .tool-item {
   padding: 10px 0;
-  border-bottom: 1px solid #2b2f33;
+  background: #01345e;
+  border-bottom: 1px solid #004B87;
 }
 
 .tool-item a {
@@ -840,15 +842,17 @@ pre#log {
   margin: 100px auto 60px;
   padding: 22px;
   background: var(--card);
+  backdrop-filter: blur(14px);
+  border: 1px solid var(--card-border);
   border-radius: 12px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, .55);
 }
 
 .section h1,
 .section h2 {
   font-size: 26px;
   margin-bottom: 10px;
-  text-shadow: 0 0 10px rgba(34, 211, 166, .3);
+  text-shadow: 0 0 10px rgba(6, 61, 48, 0.3);
 }
 
 .section p {
@@ -876,7 +880,7 @@ p.lead {
 }
 
 .control {
-  background: #0f1315;
+  background: #004B87;
   padding: 10px;
   border-radius: 8px;
   border: 1px solid #222;
@@ -975,7 +979,7 @@ p.lead {
   width: 160px;
   padding: 8px;
   border-radius: 6px;
-  background: #0f1315;
+  background: #002F54;
   color: #e6eef0;
   border: 1px solid #2b2f33
 }
@@ -988,7 +992,7 @@ select {
   width: 100%;
   padding: 8px;
   border-radius: 6px;
-  background: #090b0c;
+  background: #002F54;
   border: 1px solid #222;
   color: #e6eef0
 }
@@ -996,7 +1000,7 @@ select {
 
 
 .preview {
-  background: #070808;
+  background: #11104d;
   padding: 8px;
   border-radius: 8px;
   color: #e6eef0;
@@ -1117,7 +1121,7 @@ select {
   white-space: nowrap;
   padding: 8px 10px;
   border-radius: 999px;
-  background: #1a1f23;
+  background: #004B87;
   color: #e6e6e6;
   font-size: 12px;
   text-decoration: none;
@@ -1126,7 +1130,7 @@ select {
 }
 
 .tool-btn:hover {
-  background: #0aa37f;
+  background: #004B87;
   color: #000;
 }
 
