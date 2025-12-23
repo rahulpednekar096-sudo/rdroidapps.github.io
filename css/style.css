@@ -764,7 +764,7 @@ pre#log {
 
 .sidebar {
   width: 250px;
-  background: #07417a;
+  background: #07407a88;
   border-radius: 10px;
   padding: 20px;
   height: fit-content;
@@ -807,7 +807,7 @@ pre#log {
 
 .tools-list {
   flex: 1;
-  background: #004B87;
+  background: #004a8769;
   border-radius: 10px;
   padding: 25px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.6);
@@ -819,7 +819,7 @@ pre#log {
 
 .tool-item {
   padding: 10px 0;
-  background: #01345e;
+  background: #01345e8a;
   border-bottom: 1px solid #004B87;
 }
 
