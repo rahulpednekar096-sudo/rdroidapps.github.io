@@ -16,7 +16,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
 
   <!-- docx library -->
-  <script src="https://cdn.jsdelivr.net/npm/docx@8.3.2/build/index.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
 
   <!-- OCR (optional) -->
   <script src="https://unpkg.com/tesseract.js@v4.1.1/dist/tesseract.min.js"></script>
@@ -69,7 +69,6 @@
 
     <div id="download"></div>
     <!-- SEO Content -->
-    <pre id="log">Ready.</pre>
     <div id="warning" style="color:#ffb199; margin-top:8px"></div>
     <hr style="margin:32px 0">
 
@@ -129,6 +128,7 @@
       const download = document.getElementById("download");
       const enableOCR = document.getElementById("enableOCR");
       let currentPDF = null;
+      let docxLib = null; // We'll store the docx library here
 
       /* Utility */
       function log(msg) { logEl.textContent += "\n" + msg; logEl.scrollTop = logEl.scrollHeight; }
@@ -172,15 +172,28 @@
         }
       }
 
-      /* Convert to DOCX */
+      /* Load docx library dynamically */
+      async function loadDocxLibrary() {
+        if (!docxLib) {
+          try {
+            // Try to import the docx library
+            docxLib = await import('https://cdn.jsdelivr.net/npm/docx@8.2.0/+esm');
+            log("docx library loaded successfully");
+          } catch (error) {
+            log("Error loading docx library: " + error.message);
+            throw error;
+          }
+        }
+        return docxLib;
+      }
+
+      /* Convert to DOCX - Beautiful download button */
       convertBtn.onclick = async () => {
         if (!currentPDF) { alert("Select a PDF first"); return; }
         log("Extracting text...");
         setProgress(0);
 
-        const { Document, Packer, Paragraph } = docx;
-        const doc = new Document({ sections: [{ properties: {}, children: [] }] });
-        const children = doc.sections[0].children;
+        let wordContent = "";
         const doOCR = enableOCR.checked;
 
         for (let i = 1; i <= currentPDF.numPages; i++) {
@@ -201,26 +214,103 @@
             text = content.items.map(item => item.str).join(" ");
           }
 
-          children.push(new Paragraph({ text: "--- Page " + i + " ---" }));
-          text.split("\n").forEach(line => {
-            children.push(new Paragraph({ text: line }));
-          });
-
+          wordContent += `--- Page ${i} ---\n${text}\n\n`;
           setProgress(i / currentPDF.numPages);
           await new Promise(r => setTimeout(r, 20));
         }
 
         log("Building DOCX file...");
-        const blob = await Packer.toBlob(doc);
-        const a = document.createElement("a");
-        a.href = URL.createObjectURL(blob);
-        a.download = "converted.docx";
-        a.textContent = "Download Word File";
-        a.className = "btn-primary";
-        download.appendChild(a);
 
-        log("Done.");
+        // Create a simple Word document (XML format)
+        const xmlContent = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<?mso-application progid="Word.Document"?>
+<w:wordDocument xmlns:w="http://schemas.microsoft.com/office/word/2003/wordml">
+  <w:body>
+    <w:p>
+      <w:r>
+        <w:t>${wordContent.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/\n/g, '&#10;')}</w:t>
+      </w:r>
+    </w:p>
+  </w:body>
+</w:wordDocument>`;
+
+        const blob = new Blob([xmlContent], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+        const url = URL.createObjectURL(blob);
+
+        // Create nice download box with button
+        download.innerHTML = `
+        <div class="download-box" style="
+            margin-top: 20px;
+            padding: 20px;
+            background: linear-gradient(135deg, #0a2a1e 0%, #083525 100%);
+            border-radius: 10px;
+            border: 2px solid #0aa37f;
+            box-shadow: 0 4px 12px rgba(10, 163, 127, 0.2);
+        ">
+            <div style="display: flex; align-items: center; margin-bottom: 15px;">
+                <div style="
+                    width: 40px;
+                    height: 40px;
+                    background: #0aa37f;
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    margin-right: 15px;
+                    font-size: 20px;
+                ">✓</div>
+                <div>
+                    <h3 style="margin: 0; color: #0aa37f; font-size: 18px;">Conversion Successful!</h3>
+                    <p style="margin: 5px 0 0 0; color: #9fbfb0; font-size: 14px;">Your Word file is ready</p>
+                </div>
+            </div>
+
+            <div style="
+                background: rgba(10, 163, 127, 0.1);
+                padding: 15px;
+                border-radius: 8px;
+                margin-bottom: 15px;
+                border: 1px solid rgba(10, 163, 127, 0.3);
+            ">
+                <div style="color: #9fbfb0; font-size: 14px; margin-bottom: 5px;">File Details:</div>
+                <div style="color: white; font-family: monospace; font-size: 13px;">
+                    <div>File: <strong>converted.docx</strong></div>
+                    <div>Pages: <strong>${currentPDF.numPages}</strong></div>
+                    <div>Size: <strong>${Math.round(blob.size / 1024)} KB</strong></div>
+                </div>
+            </div>
+
+            <a href="${url}" download="converted.docx" class="btn-primary" style="
+                display: inline-block;
+                padding: 12px 24px;
+                background: linear-gradient(135deg, #0aa37f 0%, #08946e 100%);
+                color: white;
+                border: none;
+                border-radius: 6px;
+                font-size: 16px;
+                font-weight: bold;
+                text-decoration: none;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                box-shadow: 0 4px 8px rgba(10, 163, 127, 0.3);
+            " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 12px rgba(10, 163, 127, 0.4)';"
+            onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 8px rgba(10, 163, 127, 0.3)';">
+                📥 Download Word File
+            </a>
+
+            <div style="margin-top: 10px; color: #9fbfb0; font-size: 13px;">
+                Click the button above to download your converted document
+            </div>
+        </div>
+    `;
+
+        log("Done. Your file is ready for download.");
         setProgress(-1);
+
+        // Clean up URL object when page is unloaded
+        window.addEventListener('beforeunload', () => {
+          URL.revokeObjectURL(url);
+        });
       };
 
       document.getElementById("clearBtn").onclick = clear;
