@@ -66,7 +66,10 @@
           <option value="270">270°</option>
           <option value="0">0° (reset)</option>
         </select>
-        <div style="margin-top:8px"><button class="btn btn-primary" id="applyBtn">Apply</button></div>
+        <div style="margin-top:8px">
+          <button class="btn btn-primary" id="applyBtn">Apply</button>
+          <button class="btn" id="clearBtn" style="margin-left:8px">All Clear</button>
+        </div>
       </div>
 
       <div class="control">
@@ -78,8 +81,8 @@
         <label>Output filename</label>
         <input type="text" id="outName" value="rotated.pdf"
           style="width:100%;padding:8px;background:#090b0c;border:1px solid #222;color:#e6eef0;border-radius:6px">
-        <div style="margin-top:8px"><button class="btn btn-primary" id="downloadBtn" style="display:none">Your Download
-            is Ready</button></div>
+        <div style="margin-top:8px"><button class="btn" id="downloadBtn" style="display:none">Download (after
+            apply)</button></div>
       </div>
     </div>
 
@@ -117,6 +120,8 @@
           re-encoding, ensuring no loss in quality.</li>
         <li><strong>User-Friendly Interface:</strong> An intuitive design makes it easy for users of all skill levels to
           rotate PDFs quickly and efficiently.</li>
+        <li><strong>Reset Functionality:</strong> Easily clear all settings and start over with the "All Clear" button.
+        </li>
       </ul>
       <h3>How to Use the Rotate PDF Tool:</h3>
       <ol>
@@ -128,6 +133,7 @@
           prepared for download.</li>
         <li><strong>Download:</strong> Once the rotation is applied, click the download button to save your rotated PDF
           document.</li>
+        <li><strong>Reset:</strong> Use the "All Clear" button to reset the tool and start with a new PDF.</li>
       </ol>
       <p>
         Try our Rotate PDF tool today and ensure your documents are always presented in the correct orientation with
@@ -156,6 +162,7 @@
     const downloadBtn = document.getElementById('downloadBtn'), outName = document.getElementById('outName');
     const processingStatus = document.getElementById('processingStatus');
     const successStatus = document.getElementById('successStatus');
+    const clearBtn = document.getElementById('clearBtn');
 
     let srcBytes = null, pdfDocJS = null, pageCount = 0, perPageRotation = []; // rotation degrees 0/90/180/270
     let processedBlob = null;
@@ -189,6 +196,41 @@
       setProgress(-1);
     }
 
+    // Function to clear everything
+    function clearAll() {
+      // Reset variables
+      srcBytes = null;
+      pdfDocJS = null;
+      pageCount = 0;
+      perPageRotation = [];
+      processedBlob = null;
+
+      // Clear UI elements
+      thumbsWrap.innerHTML = '';
+      logEl.textContent = 'Ready.';
+      outName.value = 'rotated.pdf';
+
+      // Hide download button and status
+      downloadBtn.style.display = 'none';
+      downloadBtn.disabled = true;
+      hideAllStatus();
+
+      // Reset file input
+      fileInput.value = '';
+
+      // Reset drop area style
+      dropArea.style.borderColor = '#202426';
+
+      // Reset per-page rotation array
+      perPageRotation = [];
+
+      // Reset select options to default
+      actionSel.value = 'rotate';
+      angleSel.value = '90';
+
+      log('All cleared. Ready for new PDF.');
+    }
+
     // Initially hide download button and status
     downloadBtn.style.display = 'none';
     downloadBtn.disabled = true;
@@ -197,9 +239,16 @@
     pickBtn.addEventListener('click', () => fileInput.click());
     fileInput.addEventListener('change', e => loadFile(e.target.files[0]));
 
+    // All Clear button event
+    clearBtn.addEventListener('click', clearAll);
+
     dropArea.addEventListener('dragover', e => { e.preventDefault(); dropArea.style.borderColor = '#0aa37f'; });
     dropArea.addEventListener('dragleave', () => dropArea.style.borderColor = '#202426');
-    dropArea.addEventListener('drop', e => { e.preventDefault(); dropArea.style.borderColor = '#202426'; if (e.dataTransfer.files.length) loadFile(e.dataTransfer.files[0]); });
+    dropArea.addEventListener('drop', e => {
+      e.preventDefault();
+      dropArea.style.borderColor = '#202426';
+      if (e.dataTransfer.files.length) loadFile(e.dataTransfer.files[0]);
+    });
 
     async function loadFile(file) {
       if (!file) return;
