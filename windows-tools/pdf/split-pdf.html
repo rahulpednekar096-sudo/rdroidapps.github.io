@@ -55,15 +55,31 @@
       <div class="control">
         <label>Mode</label>
         <select id="modeSelect">
-          <option value="ranges">Split by ranges (1-3,4-6)</option>
+          <option value="ranges">Split by page ranges</option>
           <option value="everyN">Split every N pages</option>
           <option value="extract">Extract selected pages</option>
         </select>
 
+        <div id="modeHelp" style="font-size:12px;color:#9fbfb0;margin-top:4px;">
+          <span id="rangesHelp" style="display:block;">
+            • <strong>Page ranges:</strong> Enter specific pages or ranges like 1-3,5,7-9
+          </span>
+          <span id="everyNHelp" style="display:none;">
+            • <strong>Every N pages:</strong> Automatically split after every N pages (e.g., 2 = pairs of pages)
+          </span>
+          <span id="extractHelp" style="display:none;">
+            • <strong>Extract pages:</strong> Select pages from thumbnails below
+          </span>
+        </div>
+
         <div id="rangesUI" style="margin-top:8px;">
-          <label>Ranges (comma separated, e.g. 1-3,5,7-9)</label>
-          <input type="text" id="rangesInput" placeholder="1-3,5,7-9"
+          <label>Page ranges (e.g., 1-3, 5, 7-9)</label>
+          <input type="text" id="rangesInput" placeholder="Examples: 1-5, 8, 10-15"
             style="width:100%;padding:8px;margin-top:6px;background:#090b0c;border:1px solid #222;color:#e6eef0;border-radius:6px">
+          <div style="font-size:12px;color:#9fbfb0;margin-top:4px;">
+            Enter page numbers or ranges separated by commas. Example: 1-5 extracts pages 1 through 5, 8 extracts only
+            page 8.
+          </div>
         </div>
 
         <div id="everyNUI" style="display:none;margin-top:8px;">
@@ -130,10 +146,10 @@
       <h2>How to Split a PDF File</h2>
 
       <ol>
-        <li><strong>Upload PDF:</strong> Drag and drop your PDF file or click “Choose file”.</li>
+        <li><strong>Upload PDF:</strong> Drag and drop your PDF file or click "Choose file".</li>
         <li><strong>Select Mode:</strong> Choose range-based splitting, every N pages, or page extraction.</li>
         <li><strong>Adjust Options:</strong> Enter ranges, select pages, and choose output format.</li>
-        <li><strong>Split PDF:</strong> Click the “Split PDF” button to start processing.</li>
+        <li><strong>Split PDF:</strong> Click the "Split PDF" button to start processing.</li>
         <li><strong>Download:</strong> Save the generated PDFs or ZIP file instantly.</li>
       </ol>
 
@@ -151,22 +167,39 @@
     function toggleMenu() {
       document.getElementById("drawer").classList.toggle("open");
     }
-    const pickBtn = document.getElementById('pickBtn'), fileInput = document.getElementById('fileInput'), dropArea = document.getElementById('dropArea');
-    const modeSelect = document.getElementById('modeSelect'), rangesInput = document.getElementById('rangesInput'), everyNUI = document.getElementById('everyNUI');
-    const everyN = document.getElementById('everyN'), rangesUI = document.getElementById('rangesUI');
-    const outType = document.getElementById('outType'), outBase = document.getElementById('outBase');
-    const splitBtn = document.getElementById('splitBtn'), clearBtn = document.getElementById('clearBtn');
-    const thumbsWrap = document.getElementById('thumbsWrap'), logEl = document.getElementById('log'), progressWrap = document.getElementById('progressWrap'), progressBar = document.getElementById('progressBar');
-    const pageInfo = document.getElementById('pageInfo'), downloadArea = document.getElementById('downloadArea');
+
+    const pickBtn = document.getElementById('pickBtn'),
+      fileInput = document.getElementById('fileInput'),
+      dropArea = document.getElementById('dropArea');
+    const modeSelect = document.getElementById('modeSelect'),
+      rangesInput = document.getElementById('rangesInput'),
+      everyNUI = document.getElementById('everyNUI');
+    const everyN = document.getElementById('everyN'),
+      rangesUI = document.getElementById('rangesUI');
+    const outType = document.getElementById('outType'),
+      outBase = document.getElementById('outBase');
+    const splitBtn = document.getElementById('splitBtn'),
+      clearBtn = document.getElementById('clearBtn');
+    const thumbsWrap = document.getElementById('thumbsWrap'),
+      logEl = document.getElementById('log'),
+      progressWrap = document.getElementById('progressWrap'),
+      progressBar = document.getElementById('progressBar');
+    const pageInfo = document.getElementById('pageInfo'),
+      downloadArea = document.getElementById('downloadArea');
+
     let pdfBytes = null, pdfDocJS = null, pageCount = 0, pages = []; // pages: {pageNum, thumb, selected}
 
-    function log(msg) { logEl.textContent += '\\n' + msg; logEl.scrollTop = logEl.scrollHeight; }
+    function log(msg) { logEl.textContent += '\n' + msg; logEl.scrollTop = logEl.scrollHeight; }
     function setProgress(p) { progressWrap.style.display = p >= 0 ? 'block' : 'none'; progressBar.style.width = ((p || 0) * 100).toFixed(1) + '%'; }
 
     modeSelect.addEventListener('change', () => {
       const m = modeSelect.value;
       rangesUI.style.display = m === 'ranges' ? 'block' : 'none';
       everyNUI.style.display = m === 'everyN' ? 'block' : 'none';
+      // Update help text
+      document.getElementById('rangesHelp').style.display = m === 'ranges' ? 'block' : 'none';
+      document.getElementById('everyNHelp').style.display = m === 'everyN' ? 'block' : 'none';
+      document.getElementById('extractHelp').style.display = m === 'extract' ? 'block' : 'none';
     });
 
     pickBtn.addEventListener('click', () => fileInput.click());
@@ -174,7 +207,11 @@
 
     dropArea.addEventListener('dragover', e => { e.preventDefault(); dropArea.style.borderColor = '#0aa37f'; });
     dropArea.addEventListener('dragleave', () => dropArea.style.borderColor = '#202426');
-    dropArea.addEventListener('drop', e => { e.preventDefault(); dropArea.style.borderColor = '#202426'; if (e.dataTransfer.files.length) loadFile(e.dataTransfer.files[0]); });
+    dropArea.addEventListener('drop', e => {
+      e.preventDefault();
+      dropArea.style.borderColor = '#202426';
+      if (e.dataTransfer.files.length) loadFile(e.dataTransfer.files[0]);
+    });
 
     async function loadFile(file) {
       if (!file) return;
@@ -189,7 +226,9 @@
       for (let i = 1; i <= pageCount; i++) {
         const page = await pdfDocJS.getPage(i);
         const vp = page.getViewport({ scale: 0.2 });
-        const canvas = document.createElement('canvas'); canvas.width = vp.width; canvas.height = vp.height;
+        const canvas = document.createElement('canvas');
+        canvas.width = vp.width;
+        canvas.height = vp.height;
         await page.render({ canvasContext: canvas.getContext('2d'), viewport: vp }).promise;
         const dataURL = canvas.toDataURL('image/png');
         pages.push({ pageNum: i, thumb: dataURL, selected: true });
@@ -203,7 +242,8 @@
     function renderThumbnails() {
       thumbsWrap.innerHTML = '';
       pages.forEach((p, idx) => {
-        const div = document.createElement('div'); div.className = 'thumb';
+        const div = document.createElement('div');
+        div.className = 'thumb';
         div.innerHTML = `<img src="${p.thumb}"><div style="color:#9fbfb0">Page ${p.pageNum}</div>
         <div style="margin-top:6px"><label><input type="checkbox" data-idx="${idx}" ${p.selected ? 'checked' : ''}> Select</label></div>`;
         thumbsWrap.appendChild(div);
@@ -215,14 +255,25 @@
 
     splitBtn.addEventListener('click', async () => {
       if (!pdfBytes) { alert('Load a PDF first'); return; }
-      setProgress(0); log('Starting split...');
+      setProgress(0);
+      downloadArea.innerHTML = ''; // Clear previous downloads
+      log('Starting split...');
       const mode = modeSelect.value;
       let tasks = [];
+
       if (mode === 'ranges') {
         const raw = rangesInput.value.trim();
-        if (!raw) { alert('Enter ranges'); setProgress(-1); return; }
+        if (!raw) {
+          alert('Please enter page ranges\n\nExamples:\n• 1-5 (pages 1 through 5)\n• 1,3,5 (pages 1, 3 and 5)\n• 1-3,5,7-9 (pages 1-3, 5, and 7-9)');
+          setProgress(-1);
+          return;
+        }
         tasks = parseRanges(raw);
-        if (!tasks.length) { alert('No valid ranges parsed'); setProgress(-1); return; }
+        if (!tasks.length) {
+          // Error already shown by parseRanges function
+          setProgress(-1);
+          return;
+        }
       } else if (mode === 'everyN') {
         const n = parseInt(everyN.value) || 1;
         for (let i = 1; i <= pageCount; i += n) {
@@ -238,12 +289,13 @@
 
       log('Planned ' + tasks.length + ' output files.');
       const zip = new JSZip();
-      const outFiles = [];
 
       const srcPdf = await PDFLib.PDFDocument.load(pdfBytes);
+
       for (let t = 0; t < tasks.length; t++) {
         const { from, to } = tasks[t];
         log('Creating PDF for pages ' + from + ' - ' + to);
+
         // create new doc and copy pages
         const newPdf = await PDFLib.PDFDocument.create();
         for (let p = from; p <= to; p++) {
@@ -252,22 +304,57 @@
         }
         const outBytes = await newPdf.save();
         const fname = `${outBase.value || 'split'}_${from}-${to}.pdf`;
-        if (outType.value === 'zip') zip.file(fname, outBytes);
-        else {
+
+        if (outType.value === 'zip') {
+          zip.file(fname, outBytes);
+        } else {
+          // Create download button for individual files
           const blob = new Blob([outBytes], { type: 'application/pdf' });
-          const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = fname; a.textContent = 'Download ' + fname; a.className = 'btn'; a.style.display = 'block';
+          const a = document.createElement('a');
+          a.href = URL.createObjectURL(blob);
+          a.download = fname;
+          a.textContent = 'Download ' + fname;
+          a.className = 'btn';
+          a.style.display = 'block';
+          a.style.marginBottom = '8px';
           downloadArea.appendChild(a);
         }
+
         setProgress((t + 1) / tasks.length);
         await briefYield(40);
       }
 
+      // For ZIP files, create download button instead of auto-download
       if (outType.value === 'zip') {
-        const blob = await zip.generateAsync({ type: 'blob' });
-        saveAs(blob, (outBase.value || 'split') + '.zip');
-        log('ZIP generated and downloaded.');
+        log('ZIP file created. Click download button.');
+
+        // Create download button for ZIP
+        const downloadBtn = document.createElement('button');
+        downloadBtn.className = 'btn btn-primary';
+        downloadBtn.textContent = 'Download ZIP File';
+        downloadBtn.style.marginTop = '12px';
+        downloadBtn.style.display = 'block';
+
+        downloadBtn.addEventListener('click', async () => {
+          log('Generating ZIP file...');
+          downloadBtn.disabled = true;
+          downloadBtn.textContent = 'Generating ZIP...';
+
+          try {
+            const blob = await zip.generateAsync({ type: 'blob' });
+            saveAs(blob, (outBase.value || 'split') + '.zip');
+            log('ZIP downloaded successfully.');
+          } catch (error) {
+            log('Error generating ZIP: ' + error.message);
+          } finally {
+            downloadBtn.disabled = false;
+            downloadBtn.textContent = 'Download ZIP File';
+          }
+        });
+
+        downloadArea.appendChild(downloadBtn);
       } else {
-        log('Files generated for direct download.');
+        log('Files ready for download. Click the buttons above.');
       }
 
       setProgress(-1);
@@ -276,19 +363,75 @@
     function parseRanges(text) {
       const parts = text.split(',').map(s => s.trim()).filter(Boolean);
       const out = [];
+      const errors = [];
+
       for (const p of parts) {
         if (p.includes('-')) {
           const [a, b] = p.split('-').map(x => parseInt(x.trim())).filter(x => !isNaN(x));
-          if (a && b && a <= b && a >= 1 && b <= pageCount) out.push({ from: a, to: b });
+
+          if (!a || !b) {
+            errors.push(`Invalid range: "${p}" - Please use format like "1-3"`);
+            continue;
+          }
+
+          if (a > b) {
+            errors.push(`Invalid range: "${p}" - Start page (${a}) cannot be greater than end page (${b})`);
+            continue;
+          }
+
+          if (a < 1) {
+            errors.push(`Invalid range: "${p}" - Page numbers must be at least 1`);
+            continue;
+          }
+
+          if (b > pageCount) {
+            errors.push(`Invalid range: "${p}" - Page ${b} does not exist (PDF has only ${pageCount} pages)`);
+            continue;
+          }
+
+          out.push({ from: a, to: b });
         } else {
           const n = parseInt(p);
-          if (n && n >= 1 && n <= pageCount) out.push({ from: n, to: n });
+
+          if (isNaN(n)) {
+            errors.push(`Invalid page number: "${p}" - Please enter a valid number`);
+            continue;
+          }
+
+          if (n < 1) {
+            errors.push(`Invalid page: "${p}" - Page numbers must be at least 1`);
+            continue;
+          }
+
+          if (n > pageCount) {
+            errors.push(`Invalid page: "${p}" - Page ${n} does not exist (PDF has only ${pageCount} pages)`);
+            continue;
+          }
+
+          out.push({ from: n, to: n });
         }
       }
+
+      // If there are errors, show them and return empty array
+      if (errors.length > 0) {
+        alert("Please correct the following errors:\n\n" + errors.join("\n"));
+        return [];
+      }
+
       return out;
     }
 
-    clearBtn.addEventListener('click', () => { pdfBytes = null; pdfDocJS = null; pageCount = 0; pages = []; thumbsWrap.innerHTML = ''; downloadArea.innerHTML = ''; document.getElementById('log').textContent = 'Ready.'; setProgress(-1); pageInfo.textContent = ''; });
+    clearBtn.addEventListener('click', () => {
+      pdfBytes = null;
+      pdfDocJS = null;
+      pageCount = 0;
+      pages = [];
+      thumbsWrap.innerHTML = '';
+      downloadArea.innerHTML = '';
+      logEl.textContent = 'Ready.';
+      setProgress(-1);
+      pageInfo.textContent = '';
+    });
 
     function briefYield(ms = 10) { return new Promise(r => setTimeout(r, ms)); }
   </script>
